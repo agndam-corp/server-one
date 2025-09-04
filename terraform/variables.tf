@@ -12,9 +12,8 @@ variable "kubeconfig_dir" {
   default     = "/home/ubuntu/.kube"
 }
 
-variable "argocd_admin_password" {
-  description = "The admin password for ArgoCD"
+variable "github_ssh_private_key_path" {
+  description = "Path to the SSH private key file for accessing the GitHub repository"
   type        = string
-  sensitive   = true
-  default     = "admin123"  # Default password - should be changed in production
+  default     = "../private/githubconnection"
 }

@@ -1,0 +1,5 @@
+# Values for cert-manager dependency
+cert-manager:
+  installCRDs: true
+  prometheus:
+    enabled: false

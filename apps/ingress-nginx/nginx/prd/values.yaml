@@ -1,0 +1,13 @@
+# Values for nginx ingress controller dependency
+ingress-nginx:
+  controller:
+    service:
+      type: LoadBalancer
+    config:
+      use-forwarded-headers: "true"
+  # Uncomment and modify the following lines to customize the deployment
+  # replicaCount: 1
+  # image:
+  #   repository: registry.k8s.io/ingress-nginx/controller
+  #   tag: v1.11.3
+  #   pullPolicy: IfNotPresent
