@@ -7,12 +7,20 @@ spec:
     # The ACME server URL
     server: https://acme-v02.api.letsencrypt.org/directory
     # Email address used for ACME registration
-    email: your-email@djasko.com  # Replace with your email
+    email: damian.jaskolski95@gmial.com  # Replace with your email
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
       name: letsencrypt-prod
-    # Enable the DNS-01 challenge provider with manual configuration
+    # Enable the DNS-01 challenge provider with Spaceship.com webhook
     solvers:
     - dns01:
-        manual:
-          {}
+        webhook:
+          groupName: acme.spaceship.com
+          solverName: spaceship
+          config:
+            apiKeySecretRef:
+              name: spaceship-api-credentials
+              key: api-key
+            apiSecretRef:
+              name: spaceship-api-credentials
+              key: api-secret
