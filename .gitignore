@@ -1,0 +1,28 @@
+# Terraform specific ignores
+.terraform/
+
+# Ignore Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Ignore Terraform variables files (except .tfvars files that are meant to be shared)
+*.tfvars.json
+crash.log
+terraform.tfvars.json
+
+# Ignore private keys and sensitive files
+/private/
+!/.terraform.lock.hcl
+
+# Kubeconfig
+.kube/
+
+# Ignore any local kubeconfig files
+kubeconfig.yaml
+
+# Ignore any local environment files
+.env
+
+# Ignore private files
+private
+.vscode/
