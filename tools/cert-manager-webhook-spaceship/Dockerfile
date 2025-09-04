@@ -16,6 +16,16 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o webhook main.go
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
-WORKDIR /root/
+# Create app directory
+WORKDIR /app
+# Copy the binary
 COPY --from=builder /workspace/webhook .
+# Set proper permissions
+RUN chmod +x ./webhook
+# Create non-root user
+RUN addgroup -S -g 1000 appgroup &&\
+    adduser -S -u 1000 -G appgroup appuser
+# Change ownership to the non-root user
+RUN chown appuser:appgroup ./webhook
+USER appuser
 CMD ["./webhook"]

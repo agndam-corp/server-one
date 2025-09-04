@@ -105,13 +105,13 @@ func (c *spaceshipDNSProviderSolver) Initialize(kubeClientConfig *rest.Config, s
 
 // loadConfig is a small helper function that decodes the JSON configuration
 // into the typed config struct.
-func loadConfig(cfgJSON *certmanagermetav1.JSON) (spaceshipDNSProviderConfig, error) {
+func loadConfig(cfgJSON *v1alpha1.ChallengeRequest) (spaceshipDNSProviderConfig, error) {
 	cfg := spaceshipDNSProviderConfig{}
 	// Handle the case where no configuration is provided
-	if cfgJSON == nil {
+	if cfgJSON.Config == nil {
 		return cfg, nil
 	}
-	if err := json.Unmarshal(cfgJSON.Raw, &cfg); err != nil {
+	if err := json.Unmarshal(cfgJSON.Config.Raw, &cfg); err != nil {
 		return cfg, fmt.Errorf("error decoding solver config: %v", err)
 	}
 
@@ -121,7 +121,7 @@ func loadConfig(cfgJSON *certmanagermetav1.JSON) (spaceshipDNSProviderConfig, er
 // getApiCredentials retrieves the Spaceship.com API credentials from the Kubernetes secret
 func (c *spaceshipDNSProviderSolver) getApiCredentials(ch *v1alpha1.ChallengeRequest) (string, string, error) {
 	// Load the configuration
-	cfg, err := loadConfig(ch.Config)
+	cfg, err := loadConfig(ch)
 	if err != nil {
 		return "", "", err
 	}

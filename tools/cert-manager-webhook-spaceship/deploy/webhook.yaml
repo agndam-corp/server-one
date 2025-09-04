@@ -112,8 +112,8 @@ spec:
       serviceAccountName: cert-manager-webhook-spaceship
       containers:
         - name: cert-manager-webhook-spaceship
-          image: damianjaskolski95/cert-manager-webhook-spaceship:latest
-          imagePullPolicy: Always
+          image: cert-manager-webhook-spaceship:latest
+          imagePullPolicy: Never
           env:
             - name: GROUP_NAME
               value: "acme.spaceship.com"

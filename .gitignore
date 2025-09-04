@@ -26,3 +26,5 @@ kubeconfig.yaml
 # Ignore private files
 private
 .vscode/
+notes/
+cert-manager-webhook-spaceship.tar

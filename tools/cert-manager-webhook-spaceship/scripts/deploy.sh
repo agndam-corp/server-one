@@ -3,7 +3,7 @@
 # Build and deploy the cert-manager webhook for Spaceship.com
 
 # Set variables
-IMAGE_NAME="damianjaskolski95/cert-manager-webhook-spaceship"
+IMAGE_NAME="cert-manager-webhook-spaceship"
 IMAGE_TAG="latest"
 NAMESPACE="cert-manager"
 
@@ -24,10 +24,6 @@ fi
 # Build the Docker image
 echo "Building Docker image..."
 docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-
-# Push the Docker image (you'll need to be logged in to Docker Hub)
-echo "Pushing Docker image..."
-docker push ${IMAGE_NAME}:${IMAGE_TAG}
 
 # Deploy to Kubernetes
 echo "Deploying to Kubernetes..."

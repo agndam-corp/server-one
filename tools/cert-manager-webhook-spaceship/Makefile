@@ -1,16 +1,17 @@
 # Makefile for cert-manager-webhook-spaceship
 
-IMAGE_NAME = damianjaskolski95/cert-manager-webhook-spaceship
+IMAGE_NAME = cert-manager-webhook-spaceship
 IMAGE_TAG = latest
 NAMESPACE = cert-manager
 
-.PHONY: build push deploy secret clean test help
+.PHONY: build deploy secret clean test help
 
 build:
 	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
 
 push:
-	docker push $(IMAGE_NAME):$(IMAGE_TAG)
+	docker save cert-manager-webhook-spaceship:latest > cert-manager-webhook-spaceship.tar
+	sudo k3s ctr images import cert-manager-webhook-spaceship.tar
 
 deploy:
 	kubectl apply -f deploy/webhook.yaml
@@ -19,7 +20,7 @@ deploy:
 secret:
 	./scripts/create-secret.sh
 
-install: build push deploy secret
+install: build push deploy
 
 uninstall:
 	kubectl delete -f deploy/
@@ -34,10 +35,9 @@ test:
 help:
 	@echo "Available targets:"
 	@echo "  build   - Build the Docker image"
-	@echo "  push    - Push the Docker image to registry"
 	@echo "  deploy  - Deploy the webhook to Kubernetes"
 	@echo "  secret  - Create the API credentials secret"
-	@echo "  install - Build, push, deploy and create secret"
+	@echo "  install - Build, deploy and create secret"
 	@echo "  uninstall - Uninstall all resources"
 	@echo "  clean   - Remove the Docker image"
 	@echo "  test    - Run tests"
