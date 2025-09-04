@@ -5,6 +5,9 @@ ingress-nginx:
       type: LoadBalancer
     config:
       use-forwarded-headers: "true"
+    # Disable admission webhook for local development
+    admissionWebhooks:
+      enabled: false
   # Uncomment and modify the following lines to customize the deployment
   # replicaCount: 1
   # image:
