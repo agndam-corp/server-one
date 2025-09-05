@@ -9,9 +9,7 @@ This webhook allows cert-manager to automate the DNS01 challenge for Let's Encry
 
 ## Installation
 
-### 1. Deploy the Webhook
-
-First, build and deploy the webhook:
+### 1. Build and Push the Webhook Image
 
 ```bash
 # Build the Docker image
@@ -21,13 +19,21 @@ make build
 # Push to your registry
 docker tag cert-manager-webhook-spaceship:latest your-registry/cert-manager-webhook-spaceship:latest
 docker push your-registry/cert-manager-webhook-spaceship:latest
-
-# Update the image repository in deploy/cert-manager-webhook-spaceship/values.yaml
-# Then deploy with Helm
-helm install cert-manager-webhook-spaceship deploy/cert-manager-webhook-spaceship
 ```
 
-### 2. Configure Spaceship API Access
+### 2. Update Image Repository
+
+Update the image repository in `deploy/cert-manager-webhook-spaceship/values.yaml` to point to your registry.
+
+### 3. Deploy via ArgoCD
+
+The webhook is deployed via ArgoCD as part of the app-of-apps pattern. The application manifest is located at `argocd/prd/applications/spaceship-webhook.yaml`.
+
+To deploy, simply sync the `cert-manager-webhook-spaceship` application in ArgoCD.
+
+If you need to make changes to the deployment, update the application manifest in `argocd/prd/applications/spaceship-webhook.yaml`.
+
+### 4. Configure Spaceship API Access
 
 Create a Kubernetes secret containing your Spaceship API key:
 
@@ -37,13 +43,34 @@ kubectl create secret generic spaceship-api-key \
   --namespace=cert-manager
 ```
 
-### 3. Create a ClusterIssuer
+### 5. Create a ClusterIssuer
 
 Apply the ClusterIssuer configuration:
 
 ```bash
 kubectl apply -f apps/cert-manager/spaceship-webhook/clusterissuer.yaml
 ```
+
+## Troubleshooting
+
+If you encounter issues:
+
+1. Check the webhook pod logs:
+   ```bash
+   kubectl logs -n cert-manager -l app=cert-manager-webhook-spaceship
+   ```
+
+2. Verify the secret exists:
+   ```bash
+   kubectl get secret spaceship-api-key -n cert-manager
+   ```
+
+3. Check the certificate status:
+   ```bash
+   kubectl describe certificate argocd-djasko-com -n argocd
+   ```
+
+4. If you see RBAC errors, ensure the webhook has the necessary permissions to access configmaps in the kube-system namespace.
 
 ## Usage
 
