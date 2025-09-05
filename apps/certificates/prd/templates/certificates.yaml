@@ -6,7 +6,7 @@ metadata:
 spec:
   secretName: argocd-djasko-com-tls
   issuerRef:
-    name: letsencrypt-prod
+    name: spaceship-cluster-issuer
     kind: ClusterIssuer
   commonName: argocd.djasko.com
   dnsNames:
@@ -20,7 +20,7 @@ metadata:
 spec:
   secretName: adguard-home-djasko-com-tls
   issuerRef:
-    name: letsencrypt-prod
+    name: spaceship-cluster-issuer
     kind: ClusterIssuer
   commonName: dns-adg.djasko.com
   dnsNames:
