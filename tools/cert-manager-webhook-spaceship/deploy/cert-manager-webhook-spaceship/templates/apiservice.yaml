@@ -12,7 +12,7 @@ metadata:
 spec:
   group: {{ .Values.webhook.groupName }}
   groupPriorityMinimum: 1000
-  versionPriority: 15
+  versionPriority: 100
   service:
     name: {{ include "cert-manager-webhook-spaceship.fullname" . }}
     namespace: {{ .Release.Namespace }}
