@@ -37,15 +37,4 @@ push:
 	docker save cert-manager-webhook-spaceship:latest > cert-manager-webhook-spaceship.tar
 	sudo k3s ctr images import cert-manager-webhook-spaceship.tar
 
-.PHONY: rendered-manifest.yaml
-rendered-manifest.yaml: $(OUT)/rendered-manifest.yaml
-
-$(OUT)/rendered-manifest.yaml: $(HELM_FILES) | $(OUT)
-	helm template \
-	    --name cert-manager-webhook-spaceship \
-            --set image.repository=$(IMAGE_NAME) \
-            --set image.tag=$(IMAGE_TAG) \
-            deploy/cert-manager-webhook-spaceship > $@
-
-_test $(OUT) _test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH):
-	mkdir -p $@
+build_push: build push

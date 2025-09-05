@@ -189,9 +189,10 @@ func (c *spaceshipDNSProviderSolver) getSecretKey(cfg *spaceshipDNSProviderConfi
 func (c *spaceshipDNSProviderSolver) createDNSRecord(baseURL, apiKey, apiSecret, domain, recordName, recordValue string) error {
 	url := fmt.Sprintf("%s/v1/dns/records/%s", baseURL, domain)
 	
-	// Prepare the request payload
+	// Prepare the request payload with force and items fields as required by the API
 	payload := map[string]interface{}{
-		"data": []map[string]interface{}{
+		"force": true,
+		"items": []map[string]interface{}{
 			{
 				"name": recordName,
 				"type": "TXT",
@@ -206,21 +207,20 @@ func (c *spaceshipDNSProviderSolver) createDNSRecord(baseURL, apiKey, apiSecret,
 		return fmt.Errorf("failed to marshal payload: %v", err)
 	}
 	
-	// Create the HTTP request
-	req, err := http.NewRequest("POST", url, strings.NewReader(string(jsonData)))
+	// Create the HTTP request - using PUT as per documentation
+	req, err := http.NewRequest("PUT", url, strings.NewReader(string(jsonData)))
 	if err != nil {
 		return fmt.Errorf("failed to create HTTP request: %v", err)
 	}
 	
-	// Set headers
-	// Use both API key and secret for authentication
-	req.Header.Set("X-Api-Key", apiKey)
-	req.Header.Set("X-Api-Secret", apiSecret)
+	// Set headers as per documentation
+	req.Header.Set("X-API-Key", apiKey)
+	req.Header.Set("X-API-Secret", apiSecret)
 	req.Header.Set("Content-Type", "application/json")
 	
 	// Log the request for debugging
-	fmt.Printf("Sending request to %s\n", url)
-	fmt.Printf("Request headers: X-Api-Key=[REDACTED], X-Api-Secret=[REDACTED], Content-Type=application/json\n")
+	fmt.Printf("Sending PUT request to %s\n", url)
+	fmt.Printf("Request headers: X-API-Key=[REDACTED], X-API-Secret=[REDACTED], Content-Type=application/json\n")
 	fmt.Printf("Request payload: %s\n", string(jsonData))
 	
 	// Send the request
@@ -273,23 +273,36 @@ func (c *spaceshipDNSProviderSolver) createDNSRecord(baseURL, apiKey, apiSecret,
 
 // deleteDNSRecord deletes a DNS TXT record using the Spaceship API
 func (c *spaceshipDNSProviderSolver) deleteDNSRecord(baseURL, apiKey, apiSecret, domain, recordName string) error {
-	url := fmt.Sprintf("%s/v1/dns/records/%s/%s/TXT", baseURL, domain, recordName)
+	url := fmt.Sprintf("%s/v1/dns/records/%s", baseURL, domain)
 	
-	// Create the HTTP request
-	req, err := http.NewRequest("DELETE", url, nil)
+	// Prepare the request payload to remove the specific record
+	// We need to send a PUT request with force=true and an empty items array
+	// or items array without the record we want to delete
+	payload := map[string]interface{}{
+		"force": true,
+		"items": []map[string]interface{}{}, // Empty array to remove all records, or include other records if needed
+	}
+	
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("failed to marshal payload: %v", err)
+	}
+	
+	// Create the HTTP request - using PUT to update the records
+	req, err := http.NewRequest("PUT", url, strings.NewReader(string(jsonData)))
 	if err != nil {
 		return fmt.Errorf("failed to create HTTP request: %v", err)
 	}
 	
-	// Set headers
-	// Try using both API key and secret as authentication
-	req.Header.Set("X-Api-Key", apiKey)
-	req.Header.Set("X-Api-Secret", apiSecret)
+	// Set headers as per documentation
+	req.Header.Set("X-API-Key", apiKey)
+	req.Header.Set("X-API-Secret", apiSecret)
 	req.Header.Set("Content-Type", "application/json")
 	
 	// Log the request for debugging
-	fmt.Printf("Sending DELETE request to %s\n", url)
-	fmt.Printf("DELETE request headers: X-Api-Key=[REDACTED], X-Api-Secret=[REDACTED], Content-Type=application/json\n")
+	fmt.Printf("Sending DELETE (PUT) request to %s\n", url)
+	fmt.Printf("DELETE request headers: X-API-Key=[REDACTED], X-API-Secret=[REDACTED], Content-Type=application/json\n")
+	fmt.Printf("DELETE request payload: %s\n", string(jsonData))
 	
 	// Send the request
 	client := &http.Client{}

@@ -32,7 +32,7 @@ kubectl create secret generic spaceship-api-key \
   
   
 
-echo "Secret 'spaceship-api-credentials' created successfully in namespace '$NAMESPACE'"
+echo "Secret 'spaceship-api-key' created successfully in namespace '$NAMESPACE'"
 
 # Verify the secret was created
 echo "Verifying secret..."
