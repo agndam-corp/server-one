@@ -134,3 +134,34 @@ subjects:
     kind: ServiceAccount
     name: {{ include "cert-manager-webhook-spaceship.fullname" . }}
     namespace: {{ .Release.Namespace }}
+---
+# Grant permissions to cert-manager service account to access our custom API
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "cert-manager-webhook-spaceship.fullname" . }}:cert-manager-access
+rules:
+  - apiGroups:
+      - "acme.spaceship.com"
+    resources:
+      - "*"
+    verbs:
+      - "create"
+      - "get"
+      - "list"
+      - "update"
+      - "delete"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "cert-manager-webhook-spaceship.fullname" . }}:cert-manager-access
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "cert-manager-webhook-spaceship.fullname" . }}:cert-manager-access
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: {{ .Values.certManager.serviceAccountName }}
+    namespace: {{ .Values.certManager.namespace }}
