@@ -5,9 +5,9 @@
 replicaCount: 1
 
 image:
-  repository: quay.io/your-registry/cert-manager-webhook-spaceship
+  repository: cert-manager-webhook-spaceship
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Never
 
 nameOverride: ""
 fullnameOverride: ""
