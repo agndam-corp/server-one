@@ -165,3 +165,38 @@ subjects:
     kind: ServiceAccount
     name: {{ .Values.certManager.serviceAccountName }}
     namespace: {{ .Values.certManager.namespace }}
+---
+# Grant permissions to webhook service account to create SubjectAccessReviews
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "cert-manager-webhook-spaceship.fullname" . }}:webhook-access
+rules:
+  - apiGroups:
+      - "authorization.k8s.io"
+    resources:
+      - "subjectaccessreviews"
+    verbs:
+      - "create"
+  - apiGroups:
+      - "flowcontrol.apiserver.k8s.io"
+    resources:
+      - "prioritylevelconfigurations"
+      - "flowschemas"
+    verbs:
+      - "list"
+      - "watch"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "cert-manager-webhook-spaceship.fullname" . }}:webhook-access
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "cert-manager-webhook-spaceship.fullname" . }}:webhook-access
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: {{ include "cert-manager-webhook-spaceship.fullname" . }}
+    namespace: {{ .Release.Namespace }}
