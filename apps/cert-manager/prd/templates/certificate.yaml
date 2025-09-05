@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: argocd-djasko-com
+  namespace: argocd
+spec:
+  secretName: argocd-djasko-com-tls
+  issuerRef:
+    name: letsencrypt-production-spaceship
+    kind: ClusterIssuer
+  dnsNames:
+  - argocd.djasko.com
