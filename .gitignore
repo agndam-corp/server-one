@@ -28,3 +28,4 @@ private
 .vscode/
 notes/
 cert-manager-webhook-spaceship.tar
+*.wtf/
