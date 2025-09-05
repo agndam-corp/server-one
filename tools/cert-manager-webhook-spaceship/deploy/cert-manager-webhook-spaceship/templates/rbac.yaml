@@ -178,9 +178,14 @@ rules:
       - "subjectaccessreviews"
     verbs:
       - "create"
-  # Note: We're removing the flowcontrol permissions as they're causing issues with newer Kubernetes versions
-  # The flowcontrol.apiserver.k8s.io/v1beta3 API version is no longer available in newer Kubernetes clusters
-  # If you need these permissions, you may need to adjust based on your Kubernetes version
+  - apiGroups:
+      - "flowcontrol.apiserver.k8s.io/v1"
+    resources:
+      - "prioritylevelconfigurations"
+      - "flowschemas"
+    verbs:
+      - "list"
+      - "watch"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
