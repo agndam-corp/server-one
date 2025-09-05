@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/your-org/your-repo.git
+    repoURL: git@github.com:DamianJaskolski95/k8s-server.git
     targetRevision: HEAD
     path: tools/cert-manager-webhook-spaceship/deploy/cert-manager-webhook-spaceship
     helm:
