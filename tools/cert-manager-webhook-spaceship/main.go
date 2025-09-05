@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -41,8 +43,9 @@ type spaceshipDNSProviderSolver struct {
 // spaceshipDNSProviderConfig is a structure that is used to decode into when
 // solving a DNS01 challenge.
 type spaceshipDNSProviderConfig struct {
-	APIKeySecretRef certmanagermetav1.SecretKeySelector `json:"apiKeySecretRef"`
-	BaseURL         string                              `json:"baseUrl"`
+	APIKeyRef    certmanagermetav1.SecretKeySelector `json:"apiKeyRef"`
+	APISecretRef certmanagermetav1.SecretKeySelector `json:"apiSecretRef"`
+	BaseURL      string                              `json:"baseUrl"`
 }
 
 // Name is used as the name for this DNS solver when referencing it on the ACME
@@ -59,10 +62,15 @@ func (c *spaceshipDNSProviderSolver) Present(ch *v1alpha1.ChallengeRequest) erro
 		return err
 	}
 
-	// Retrieve the API key from Kubernetes secret
-	apiKey, err := c.getApiKey(&cfg, ch.ResourceNamespace)
+	// Retrieve the API key and secret from Kubernetes secret
+	apiKey, err := c.getSecretKey(&cfg, ch.ResourceNamespace, cfg.APIKeyRef)
 	if err != nil {
 		return fmt.Errorf("failed to get API key: %v", err)
+	}
+
+	apiSecret, err := c.getSecretKey(&cfg, ch.ResourceNamespace, cfg.APISecretRef)
+	if err != nil {
+		return fmt.Errorf("failed to get API secret: %v", err)
 	}
 
 	// Extract the domain and the record value from the challenge
@@ -83,7 +91,7 @@ func (c *spaceshipDNSProviderSolver) Present(ch *v1alpha1.ChallengeRequest) erro
 	recordName := strings.Join(parts[:len(parts)-2], ".") // "_acme-challenge.argocd"
 
 	// Create the DNS record
-	err = c.createDNSRecord(cfg.BaseURL, apiKey, domain, recordName, recordValue)
+	err = c.createDNSRecord(cfg.BaseURL, apiKey, apiSecret, domain, recordName, recordValue)
 	if err != nil {
 		return fmt.Errorf("failed to create DNS record: %v", err)
 	}
@@ -99,10 +107,15 @@ func (c *spaceshipDNSProviderSolver) CleanUp(ch *v1alpha1.ChallengeRequest) erro
 		return err
 	}
 
-	// Retrieve the API key from Kubernetes secret
-	apiKey, err := c.getApiKey(&cfg, ch.ResourceNamespace)
+	// Retrieve the API key and secret from Kubernetes secret
+	apiKey, err := c.getSecretKey(&cfg, ch.ResourceNamespace, cfg.APIKeyRef)
 	if err != nil {
 		return fmt.Errorf("failed to get API key: %v", err)
+	}
+
+	apiSecret, err := c.getSecretKey(&cfg, ch.ResourceNamespace, cfg.APISecretRef)
+	if err != nil {
+		return fmt.Errorf("failed to get API secret: %v", err)
 	}
 
 	// Extract the domain and record name
@@ -118,7 +131,7 @@ func (c *spaceshipDNSProviderSolver) CleanUp(ch *v1alpha1.ChallengeRequest) erro
 	recordName := strings.Join(parts[:len(parts)-2], ".") // "_acme-challenge.argocd"
 
 	// Delete the DNS record
-	err = c.deleteDNSRecord(cfg.BaseURL, apiKey, domain, recordName)
+	err = c.deleteDNSRecord(cfg.BaseURL, apiKey, apiSecret, domain, recordName)
 	if err != nil {
 		return fmt.Errorf("failed to delete DNS record: %v", err)
 	}
@@ -152,10 +165,10 @@ func loadConfig(cfgJSON *extapi.JSON) (spaceshipDNSProviderConfig, error) {
 	return cfg, nil
 }
 
-// getApiKey retrieves the API key from a Kubernetes secret
-func (c *spaceshipDNSProviderSolver) getApiKey(cfg *spaceshipDNSProviderConfig, namespace string) (string, error) {
-	secretName := cfg.APIKeySecretRef.Name
-	secretKey := cfg.APIKeySecretRef.Key
+// getSecretKey retrieves a secret key from a Kubernetes secret
+func (c *spaceshipDNSProviderSolver) getSecretKey(cfg *spaceshipDNSProviderConfig, namespace string, secretRef certmanagermetav1.SecretKeySelector) (string, error) {
+	secretName := secretRef.Name
+	secretKey := secretRef.Key
 	
 	// Get the secret from Kubernetes
 	secret, err := c.client.CoreV1().Secrets(namespace).Get(context.TODO(), secretName, metav1.GetOptions{})
@@ -163,17 +176,17 @@ func (c *spaceshipDNSProviderSolver) getApiKey(cfg *spaceshipDNSProviderConfig, 
 		return "", fmt.Errorf("failed to get secret %s/%s: %v", namespace, secretName, err)
 	}
 	
-	// Extract the API key from the secret
-	apiKey, ok := secret.Data[secretKey]
+	// Extract the value from the secret
+	value, ok := secret.Data[secretKey]
 	if !ok {
 		return "", fmt.Errorf("key %q not found in secret %s/%s", secretKey, namespace, secretName)
 	}
 	
-	return string(apiKey), nil
+	return string(value), nil
 }
 
 // createDNSRecord creates a DNS TXT record using the Spaceship API
-func (c *spaceshipDNSProviderSolver) createDNSRecord(baseURL, apiKey, domain, recordName, recordValue string) error {
+func (c *spaceshipDNSProviderSolver) createDNSRecord(baseURL, apiKey, apiSecret, domain, recordName, recordValue string) error {
 	url := fmt.Sprintf("%s/v1/dns/records/%s", baseURL, domain)
 	
 	// Prepare the request payload
@@ -200,8 +213,15 @@ func (c *spaceshipDNSProviderSolver) createDNSRecord(baseURL, apiKey, domain, re
 	}
 	
 	// Set headers
-	req.Header.Set("Authorization", "Bearer "+apiKey)
+	// Use both API key and secret for authentication
+	req.Header.Set("X-Api-Key", apiKey)
+	req.Header.Set("X-Api-Secret", apiSecret)
 	req.Header.Set("Content-Type", "application/json")
+	
+	// Log the request for debugging
+	fmt.Printf("Sending request to %s\n", url)
+	fmt.Printf("Request headers: X-Api-Key=[REDACTED], X-Api-Secret=[REDACTED], Content-Type=application/json\n")
+	fmt.Printf("Request payload: %s\n", string(jsonData))
 	
 	// Send the request
 	client := &http.Client{}
@@ -211,16 +231,48 @@ func (c *spaceshipDNSProviderSolver) createDNSRecord(baseURL, apiKey, domain, re
 	}
 	defer resp.Body.Close()
 	
+	// Log the response for debugging
+	respBody, _ := io.ReadAll(resp.Body)
+	fmt.Printf("Response status: %d\n", resp.StatusCode)
+	fmt.Printf("Response body: %s\n", string(respBody))
+	
 	// Check the response
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		// Try a different authentication method if the first one fails
+		if resp.StatusCode == 401 {
+			fmt.Printf("Trying different authentication method\n")
+			
+			// Reset the request body
+			req.Body = io.NopCloser(strings.NewReader(string(jsonData)))
+			
+			// Try using Basic auth with the API key and secret
+			req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(apiKey+":"+apiSecret)))
+			
+			// Send the request again
+			resp, err = client.Do(req)
+			if err != nil {
+				return fmt.Errorf("failed to send request with basic auth: %v", err)
+			}
+			defer resp.Body.Close()
+			
+			// Log the response for debugging
+			respBody, _ = io.ReadAll(resp.Body)
+			fmt.Printf("Basic auth response status: %d\n", resp.StatusCode)
+			fmt.Printf("Basic auth response body: %s\n", string(respBody))
+			
+			if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+				return fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(respBody))
+			}
+		} else {
+			return fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(respBody))
+		}
 	}
 	
 	return nil
 }
 
 // deleteDNSRecord deletes a DNS TXT record using the Spaceship API
-func (c *spaceshipDNSProviderSolver) deleteDNSRecord(baseURL, apiKey, domain, recordName string) error {
+func (c *spaceshipDNSProviderSolver) deleteDNSRecord(baseURL, apiKey, apiSecret, domain, recordName string) error {
 	url := fmt.Sprintf("%s/v1/dns/records/%s/%s/TXT", baseURL, domain, recordName)
 	
 	// Create the HTTP request
@@ -230,8 +282,14 @@ func (c *spaceshipDNSProviderSolver) deleteDNSRecord(baseURL, apiKey, domain, re
 	}
 	
 	// Set headers
-	req.Header.Set("Authorization", "Bearer "+apiKey)
+	// Try using both API key and secret as authentication
+	req.Header.Set("X-Api-Key", apiKey)
+	req.Header.Set("X-Api-Secret", apiSecret)
 	req.Header.Set("Content-Type", "application/json")
+	
+	// Log the request for debugging
+	fmt.Printf("Sending DELETE request to %s\n", url)
+	fmt.Printf("DELETE request headers: X-Api-Key=[REDACTED], X-Api-Secret=[REDACTED], Content-Type=application/json\n")
 	
 	// Send the request
 	client := &http.Client{}
@@ -241,9 +299,14 @@ func (c *spaceshipDNSProviderSolver) deleteDNSRecord(baseURL, apiKey, domain, re
 	}
 	defer resp.Body.Close()
 	
+	// Log the response for debugging
+	respBody, _ := io.ReadAll(resp.Body)
+	fmt.Printf("DELETE response status: %d\n", resp.StatusCode)
+	fmt.Printf("DELETE response body: %s\n", string(respBody))
+	
 	// Check the response
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		return fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(respBody))
 	}
 	
 	return nil

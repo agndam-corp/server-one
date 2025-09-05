@@ -15,6 +15,9 @@ spec:
           solverName: spaceship
           config:
             baseUrl: https://spaceship.dev/api
-            apiKeySecretRef:
+            apiKeyRef:
               name: spaceship-api-key
               key: api-key
+            apiSecretRef:
+              name: spaceship-api-key
+              key: api-secret
