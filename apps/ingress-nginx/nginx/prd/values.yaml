@@ -2,7 +2,7 @@
 ingress-nginx:
   controller:
     service:
-      type: LoadBalancer
+      type: NodePort
     config:
       use-forwarded-headers: "true"
       # Timeout configurations to handle different service types appropriately
