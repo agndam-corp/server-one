@@ -2,9 +2,14 @@
 ingress-nginx:
   controller:
     service:
-      type: NodePort
+      type: LoadBalancer
     config:
       use-forwarded-headers: "true"
+      # Timeout configurations to handle different service types appropriately
+      proxy-connect-timeout: "60"
+      proxy-send-timeout: "60"
+      proxy-read-timeout: "60"
+      proxy-body-size: "50m"
     # Disable admission webhook for local development
     admissionWebhooks:
       enabled: false
