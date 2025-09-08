@@ -17,7 +17,7 @@ spec:
           service:
             name: argocd-argocd-server
             port:
-              name: https
+              name: http
   tls:
   - hosts:
     - argocd.djasko.com
