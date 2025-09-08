@@ -11,7 +11,6 @@ crash.log
 terraform.tfvars.json
 
 # Ignore private keys and sensitive files
-/private/
 !/.terraform.lock.hcl
 
 # Kubeconfig
@@ -24,7 +23,7 @@ kubeconfig.yaml
 .env
 
 # Ignore private files
-private
+private/
 .vscode/
 notes/
 cert-manager-webhook-spaceship.tar

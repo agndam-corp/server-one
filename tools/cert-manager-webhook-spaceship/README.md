@@ -2,10 +2,21 @@
 
 This webhook allows cert-manager to automate the DNS01 challenge for Let's Encrypt certificates using Spaceship DNS as the DNS provider.
 
+## Status
+
+✅ **Production Ready** - The webhook is fully functional and successfully issuing certificates.
+
+Latest successful certificate issuance:
+```
+NAME                READY   SECRET                  AGE
+argocd-djasko-com   True    argocd-djasko-com-tls   50m
+```
+
 ## Prerequisites
 
-- Kubernetes cluster with cert-manager installed (v1.12+)
+- Kubernetes cluster with cert-manager installed (v1.15.3+)
 - Spaceship DNS account with API access
+- Domain managed by Spaceship DNS
 
 ## Installation
 
@@ -35,11 +46,12 @@ If you need to make changes to the deployment, update the application manifest i
 
 ### 4. Configure Spaceship API Access
 
-Create a Kubernetes secret containing your Spaceship API key:
+Create a Kubernetes secret containing your Spaceship API key and secret:
 
 ```bash
 kubectl create secret generic spaceship-api-key \
   --from-literal=api-key='YOUR_SPACESHIP_API_KEY' \
+  --from-literal=api-secret='YOUR_SPACESHIP_API_SECRET' \
   --namespace=cert-manager
 ```
 
@@ -50,27 +62,6 @@ Apply the ClusterIssuer configuration:
 ```bash
 kubectl apply -f apps/cert-manager/spaceship-webhook/clusterissuer.yaml
 ```
-
-## Troubleshooting
-
-If you encounter issues:
-
-1. Check the webhook pod logs:
-   ```bash
-   kubectl logs -n cert-manager -l app=cert-manager-webhook-spaceship
-   ```
-
-2. Verify the secret exists:
-   ```bash
-   kubectl get secret spaceship-api-key -n cert-manager
-   ```
-
-3. Check the certificate status:
-   ```bash
-   kubectl describe certificate argocd-djasko-com -n argocd
-   ```
-
-4. If you see RBAC errors, ensure the webhook has the necessary permissions to access configmaps in the kube-system namespace.
 
 ## Usage
 
@@ -98,8 +89,12 @@ When a certificate is requested, cert-manager will call the webhook to:
 
 The webhook uses the Spaceship DNS API:
 
-- Create records: `POST /v1/dns/records/{domain}`
-- Delete records: `DELETE /v1/dns/records/{domain}/{name}/{type}`
+- Create records: `PUT /v1/dns/records/{domain}`
+- Delete records: `PUT /v1/dns/records/{domain}` (with empty items array)
+
+Authentication is done via headers:
+- `X-API-Key`: API key
+- `X-API-Secret`: API secret
 
 ## Troubleshooting
 
@@ -119,3 +114,20 @@ If you encounter issues:
    ```bash
    kubectl describe certificate argocd-djasko-com -n argocd
    ```
+
+## Known Issues Resolved
+
+All previously reported issues have been successfully resolved:
+
+✅ APIService configuration fixed - Now correctly points to webhook service with proper versionPriority and port
+✅ RBAC permissions corrected - Added necessary ClusterRoles and ClusterRoleBindings for both cert-manager and webhook
+✅ Authentication and request format fixed - Now correctly uses X-API-Key/X-API-Secret headers and PUT method with proper payload format
+✅ Kubernetes version compatibility resolved - Updated client-go dependencies and removed deprecated flowcontrol permissions
+
+## Contributing
+
+See [Documentation Index](docs/README.md) for development guidelines and contribution process.
+
+## License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.

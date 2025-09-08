@@ -12,7 +12,8 @@ This document provides an index of all documentation for the cert-manager webhoo
 | [QUICK_START.md](QUICK_START.md) | Quick start guide for deploying and using the webhook |
 | [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) | Detailed deployment guide with configuration options |
 | [TROUBLESHOOTING_GUIDE.md](TROUBLESHOOTING_GUIDE.md) | Comprehensive troubleshooting guide for common issues |
-| [FIXES_SUMMARY.md](FIXES_SUMMARY.md) | Summary of all fixes made to get the webhook working |
+| [COMPLETE_FIX_SUMMARY.md](COMPLETE_FIX_SUMMARY.md) | ✅ **Complete summary of all fixes made to get the webhook working** |
+| [FIXES_SUMMARY_OLD.md](FIXES_SUMMARY_OLD.md) | Previous summary of fixes (archived) |
 | [APISERVICE_FIX_001.md](APISERVICE_FIX_001.md) | Fix for APIService configuration issues |
 | [RBAC_FIX_001.md](RBAC_FIX_001.md) | Fix for cert-manager RBAC permissions |
 | [RBAC_FIX_002.md](RBAC_FIX_002.md) | Fix for webhook RBAC permissions |
