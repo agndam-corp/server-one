@@ -217,8 +217,8 @@ resource "kubernetes_secret" "argocd_repo_secret" {
   }
 
   data = {
-    type = "git"
-    url  = "git@github.com:DamianJaskolski95/k8s-server.git"
+    type          = "git"
+    url           = "git@github.com:DamianJaskolski95/k8s-server.git"
     sshPrivateKey = file(var.github_ssh_private_key_path)
   }
 
@@ -232,33 +232,14 @@ resource "helm_release" "argocd" {
   name       = "argocd"
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
-  version    = "7.7.10" # Use a specific version for stability
+  version    = "8.3.5" # Use a specific version for stability
   namespace  = kubernetes_namespace.argocd.metadata[0].name
 
   # Increase timeout for the Helm release
   timeout = 600
 
-  # Expose ArgoCD server with NodePort service (for local development)
-  set {
-    name  = "server.service.type"
-    value = "NodePort"
-  }
-
-  # Set server name
-  set {
-    name  = "server.name"
-    value = "argocd-server"
-  }
-
-  # Set NodePort for HTTP
-  set {
-    name  = "server.service.nodePortHttp"
-    value = "30080"
-  }
-
-  # Set NodePort for HTTPS
-  set {
-    name  = "server.service.nodePortHttps"
-    value = "30443"
-  }
+  # Use values file for configuration
+  values = [
+    file("${path.module}/values/argocd/values.yaml")
+  ]
 }

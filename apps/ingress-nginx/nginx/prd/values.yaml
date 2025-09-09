@@ -4,8 +4,8 @@ ingress-nginx:
     service:
       type: NodePort
       nodePorts:
-        http: 32707
-        https: 32708
+        http: 32080
+        https: 32443
     config:
       use-forwarded-headers: "true"
       # Timeout configurations to handle different service types appropriately

@@ -1,0 +1,38 @@
+# ArgoCD configuration values
+# These values were extracted from the main.tf file to make the configuration cleaner
+
+# Global configuration
+global:
+  domain: argocd.djasko.com
+
+# Server configuration
+server:
+  # Service configuration
+  service:
+    type: NodePort
+    nodePortHttp: 30080
+    nodePortHttps: 30443
+    servicePortHttp: 80
+    servicePortHttps: 443
+  
+  # Ingress configuration
+  ingress:
+    enabled: true
+    hostname: argocd.djasko.com
+    ingressClassName: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    extraTls:
+      - hosts:
+          - argocd.djasko.com
+        secretName: argocd-djasko-com-tls
+  
+  # Server parameters
+  config:
+    server.insecure: true
+
+# Configuration parameters
+configs:
+  params:
+    server.insecure: true
