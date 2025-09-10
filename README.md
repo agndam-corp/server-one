@@ -10,7 +10,7 @@ Before deploying, ensure you have the following tools installed:
 2. **helm** - Helm package manager for Kubernetes
 3. **kubeseal** - Sealed Secrets CLI tool for encrypting secrets
 4. **docker** - Docker for building and pushing container images
-5. **terraform** - Terraform for implementing whole arch
+5. **terraform** - Terraform for infrastructure deployment
 
 ## Setup Process
 
@@ -25,8 +25,8 @@ terraform apply
 This will:
 - Install K3s cluster
 - Deploy Sealed Secrets controller (from backed up key if available)
+- Deploy ArgoCD admin password sealed secret (to break the chicken-and-egg problem)
 - Deploy ArgoCD
-- Deploy all applications via ArgoCD App of Apps pattern
 
 ### 2. Sealed Secrets Generation
 Before deploying applications that require secrets, generate sealed secrets:
@@ -54,10 +54,17 @@ After generating sealed secrets, apply them to the cluster:
 kubectl apply -f sealed-secrets/
 ```
 
-### 4. Application Deployment
-Applications are automatically deployed by ArgoCD through the App of Apps pattern. The applications include:
-- cert-manager with custom webhook for Spaceship DNS
+### 4. Automated Application Deployment
+After applying sealed secrets, ArgoCD automatically deploys all applications through the App of Apps pattern:
+
+**Phase 1 (Terraform Deployed)**:
 - Sealed Secrets controller
+- ArgoCD admin password sealed secret
+- ArgoCD
+
+**Phase 2 (ArgoCD Deployed)**:
+- All other sealed secrets from the `sealed-secrets/` directory
+- cert-manager with custom webhook for Spaceship DNS
 - And any other applications defined in the `argocd/prd/applications/` directory
 
 ## Directory Structure
@@ -72,7 +79,10 @@ Applications are automatically deployed by ArgoCD through the App of Apps patter
 
 ## Security Notes
 
-- All sensitive data should be stored as sealed secrets
+- All sensitive data is stored as sealed secrets and can be safely committed to the repository
+- The sealed secrets controller key is backed up in the private directory for disaster recovery
+- ArgoCD admin password is deployed via Terraform to break the chicken-and-egg problem
+- All other sealed secrets are deployed via ArgoCD for proper GitOps workflow
 - Never commit unencrypted secrets to the repository
 - Regularly rotate credentials and update sealed secrets
 - Use role-based access control (RBAC) to limit access to secrets
