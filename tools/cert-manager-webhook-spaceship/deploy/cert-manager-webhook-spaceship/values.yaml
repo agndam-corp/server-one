@@ -5,9 +5,9 @@
 replicaCount: 1
 
 image:
-  repository: cert-manager-webhook-spaceship
+  repository: ghcr.io/damianjaskolski95/cert-manager-webhook-spaceship
   tag: latest
-  pullPolicy: Never
+  pullPolicy: Always
 
 nameOverride: ""
 fullnameOverride: ""

@@ -20,10 +20,10 @@ server:
   ingress:
     enabled: true
     hostname: argocd.djasko.com
-    ingressClassName: nginx
+    ingressClassName: traefik
     annotations:
-      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-      nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
     extraTls:
       - hosts:
           - argocd.djasko.com

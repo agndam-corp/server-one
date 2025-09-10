@@ -4,9 +4,9 @@ metadata:
   name: adguard-home-ingress
   namespace: adguard-home
   annotations:
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
 spec:
-  ingressClassName: nginx
+  ingressClassName: traefik
   rules:
   - host: dns-adg.djasko.com
     http:

@@ -1,133 +1,34 @@
-# Spaceship DNS Webhook for cert-manager
+# cert-manager-webhook-spaceship
 
-This webhook allows cert-manager to automate the DNS01 challenge for Let's Encrypt certificates using Spaceship DNS as the DNS provider.
+This is a custom webhook for cert-manager that handles DNS challenges for spaceship.com domains.
 
-## Status
+## Building and Pushing to GHCR
 
-✅ **Production Ready** - The webhook is fully functional and successfully issuing certificates.
+### Prerequisites
+1. Create a GitHub Personal Access Token (PAT) with `write:packages` scope
+2. Authenticate with GHCR:
+   ```bash
+   echo YOUR_PAT | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
+   ```
 
-Latest successful certificate issuance:
-```
-NAME                READY   SECRET                  AGE
-argocd-djasko-com   True    argocd-djasko-com-tls   50m
-```
-
-## Prerequisites
-
-- Kubernetes cluster with cert-manager installed (v1.15.3+)
-- Spaceship DNS account with API access
-- Domain managed by Spaceship DNS
-
-## Installation
-
-### 1. Build and Push the Webhook Image
-
+### Building and Pushing
 ```bash
-# Build the Docker image
-cd tools/cert-manager-webhook-spaceship
+# Build and push to GHCR
+make release-ghcr
+
+# Or build and push with a specific tag
+IMAGE_TAG=v1.0.0 make release-ghcr
+```
+
+### Deploying
+The webhook is deployed via ArgoCD using the Helm chart in `deploy/cert-manager-webhook-spaceship/`.
+The image is configured to pull from GHCR in `values.yaml`.
+
+## Development
+```bash
+# Run tests
+make test
+
+# Build locally
 make build
-
-# Push to your registry
-docker tag cert-manager-webhook-spaceship:latest your-registry/cert-manager-webhook-spaceship:latest
-docker push your-registry/cert-manager-webhook-spaceship:latest
 ```
-
-### 2. Update Image Repository
-
-Update the image repository in `deploy/cert-manager-webhook-spaceship/values.yaml` to point to your registry.
-
-### 3. Deploy via ArgoCD
-
-The webhook is deployed via ArgoCD as part of the app-of-apps pattern. The application manifest is located at `argocd/prd/applications/spaceship-webhook.yaml`.
-
-To deploy, simply sync the `cert-manager-webhook-spaceship` application in ArgoCD.
-
-If you need to make changes to the deployment, update the application manifest in `argocd/prd/applications/spaceship-webhook.yaml`.
-
-### 4. Configure Spaceship API Access
-
-Create a Kubernetes secret containing your Spaceship API key and secret:
-
-```bash
-kubectl create secret generic spaceship-api-key \
-  --from-literal=api-key='YOUR_SPACESHIP_API_KEY' \
-  --from-literal=api-secret='YOUR_SPACESHIP_API_SECRET' \
-  --namespace=cert-manager
-```
-
-### 5. Create a ClusterIssuer
-
-Apply the ClusterIssuer configuration:
-
-```bash
-kubectl apply -f apps/cert-manager/spaceship-webhook/clusterissuer.yaml
-```
-
-## Usage
-
-### Request a Certificate
-
-To request a certificate for `argocd.djasko.com`, apply the certificate configuration:
-
-```bash
-kubectl apply -f apps/cert-manager/spaceship-webhook/certificate.yaml
-```
-
-This will create a certificate for `argocd.djasko.com` in the `argocd` namespace.
-
-## How It Works
-
-The webhook implements the cert-manager DNS01 challenge solver interface to create and delete TXT records in Spaceship DNS for ACME DNS01 challenges.
-
-When a certificate is requested, cert-manager will call the webhook to:
-
-1. Create a TXT record with the challenge token in your Spaceship DNS zone
-2. Wait for the certificate to be issued
-3. Delete the TXT record after the challenge is complete
-
-## API Documentation
-
-The webhook uses the Spaceship DNS API:
-
-- Create records: `PUT /v1/dns/records/{domain}`
-- Delete records: `PUT /v1/dns/records/{domain}` (with empty items array)
-
-Authentication is done via headers:
-- `X-API-Key`: API key
-- `X-API-Secret`: API secret
-
-## Troubleshooting
-
-If you encounter issues:
-
-1. Check the webhook pod logs:
-   ```bash
-   kubectl logs -n cert-manager -l app=cert-manager-webhook-spaceship
-   ```
-
-2. Verify the secret exists:
-   ```bash
-   kubectl get secret spaceship-api-key -n cert-manager
-   ```
-
-3. Check the certificate status:
-   ```bash
-   kubectl describe certificate argocd-djasko-com -n argocd
-   ```
-
-## Known Issues Resolved
-
-All previously reported issues have been successfully resolved:
-
-✅ APIService configuration fixed - Now correctly points to webhook service with proper versionPriority and port
-✅ RBAC permissions corrected - Added necessary ClusterRoles and ClusterRoleBindings for both cert-manager and webhook
-✅ Authentication and request format fixed - Now correctly uses X-API-Key/X-API-Secret headers and PUT method with proper payload format
-✅ Kubernetes version compatibility resolved - Updated client-go dependencies and removed deprecated flowcontrol permissions
-
-## Contributing
-
-See [Documentation Index](docs/README.md) for development guidelines and contribution process.
-
-## License
-
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.

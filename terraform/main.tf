@@ -44,6 +44,23 @@ resource "null_resource" "install_k3s" {
   # Provisioner to download and install K3s with encryption and kubeconfig options
   provisioner "local-exec" {
     command = <<-EOT
+      # Create Traefik config with fixed node ports before installing K3s
+      mkdir -p /var/lib/rancher/k3s/server/manifests
+      cat > /var/lib/rancher/k3s/server/manifests/traefik-config.yaml << 'EOF'
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    ports:
+      web:
+        nodePort: 31292
+      websecure:
+        nodePort: 32286
+EOF
+      
       # Download and install K3s with encryption enabled and kubeconfig written
       # Using --write-kubeconfig-mode 644 to make kubeconfig readable
       # Using --secrets-encryption to enable secrets encryption
@@ -55,7 +72,7 @@ resource "null_resource" "install_k3s" {
         sleep 5
       done
       
-      echo "K3s installed and ready with encryption enabled!"
+      echo "K3s installed and ready with encryption enabled and fixed Traefik node ports!"
     EOT
 
     interpreter = ["/bin/bash", "-c"]

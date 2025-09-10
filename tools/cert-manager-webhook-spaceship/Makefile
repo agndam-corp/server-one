@@ -28,13 +28,30 @@ _test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/etcd _test/kubebuilder-$(
 clean:
 	rm -rf _test $(OUT)
 
+# GHCR configuration
+REGISTRY ?= ghcr.io
+GITHUB_OWNER ?= damianjaskolski95
+IMAGE_NAME := "cert-manager-webhook-spaceship"
+IMAGE_TAG ?= "latest"
+
 .PHONY: build
 build:
 	docker build -t "$(IMAGE_NAME):$(IMAGE_TAG)" .
 
-.PHONY: push
-push:
-	docker save cert-manager-webhook-spaceship:latest > cert-manager-webhook-spaceship.tar
-	sudo k3s ctr images import cert-manager-webhook-spaceship.tar
+.PHONY: build-ghcr
+build-ghcr:
+	docker build -t "$(REGISTRY)/$(GITHUB_OWNER)/$(IMAGE_NAME):$(IMAGE_TAG)" .
+
+.PHONY: push-ghcr
+push-ghcr:
+	docker push "$(REGISTRY)/$(GITHUB_OWNER)/$(IMAGE_NAME):$(IMAGE_TAG)"
+
+.PHONY: release-ghcr
+release-ghcr: build-ghcr push-ghcr
+
+# .PHONY: push
+# push:
+# 	docker save cert-manager-webhook-spaceship:latest > cert-manager-webhook-spaceship.tar
+# 	sudo k3s ctr images import cert-manager-webhook-spaceship.tar
 
 build_push: build push
