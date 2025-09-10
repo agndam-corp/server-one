@@ -30,3 +30,6 @@ kubeconfig
 deploy/*/charts/
 deploy/*/tmp/
 deploy/*/*.tgz
+
+# Secrets
+secrets/
