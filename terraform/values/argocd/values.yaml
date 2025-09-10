@@ -9,9 +9,12 @@ global:
 server:
   # Service configuration
   service:
-    type: LoadBalancer
+    type: NodePort
     servicePortHttp: 80
     servicePortHttps: 443
+    nodePorts:
+      http: 31080
+      https: 31443
   
   # Ingress configuration
   ingress:

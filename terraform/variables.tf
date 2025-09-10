@@ -18,14 +18,16 @@ variable "github_ssh_private_key_path" {
   default     = "../private/githubconnection"
 }
 
-variable "metallb_ip_addresses" {
-  description = "IP addresses for MetalLB to use"
-  type        = list(string)
-  default     = ["146.59.45.254/32"]
+variable "argocd_applications_repo_url" {
+  description = "The Git repository URL for ArgoCD applications"
+  type        = string
+  default     = "git@github.com:DamianJaskolski95/k8s-server.git"
 }
 
-variable "metallb_ip_pool_name" {
-  description = "Name for pool adresses"
+variable "argocd_applications_path" {
+  description = "The path in the Git repository where ArgoCD applications are defined"
   type        = string
-  default     = "production"
+  default     = "argocd/prd/applications"
 }
+
+

@@ -173,7 +173,7 @@ resource "null_resource" "cluster_ready" {
       # Wait for core system pods to be running
       until sudo k3s kubectl wait --for=condition=Ready pods --all -A --timeout=300s &>/dev/null; do
         echo "Waiting for all pods to be ready..."
-        sleep 10
+        sleep 30
       done
       echo "Cluster is fully ready!"
     EOT
@@ -189,27 +189,13 @@ module "argocd" {
   providers = {
     kubernetes = kubernetes
     helm       = helm
-  }
-
-  depends_on = [module.metallb]
-
-  kubeconfig_dir              = var.kubeconfig_dir
-  github_ssh_private_key_path = var.github_ssh_private_key_path
-}
-
-# Deploy MetalLB
-module "metallb" {
-  source = "./modules/metallb"
-
-  providers = {
     kubectl    = kubectl
-    kubernetes = kubernetes
-    helm       = helm
   }
 
   depends_on = [null_resource.cluster_ready]
 
-  metallb_ip_addresses = var.metallb_ip_addresses
-  kubeconfig_dir       = var.kubeconfig_dir
-  metallb_ip_pool_name = var.metallb_ip_pool_name
+  kubeconfig_dir               = var.kubeconfig_dir
+  github_ssh_private_key_path  = var.github_ssh_private_key_path
+  argocd_applications_repo_url = var.argocd_applications_repo_url
+  argocd_applications_path     = var.argocd_applications_path
 }

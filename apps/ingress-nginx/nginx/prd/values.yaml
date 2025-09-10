@@ -2,8 +2,12 @@
 ingress-nginx:
   controller:
     service:
-      type: LoadBalancer
-      # Remove nodePorts since we're using LoadBalancer
+      type: NodePort
+      # Using NodePort since we're not using MetalLB
+      nodePorts:
+        http: 30080
+        https: 30443
+      # Remove nodePorts since we're using static NodePorts
     config:
       use-forwarded-headers: "true"
       # Timeout configurations to handle different service types appropriately

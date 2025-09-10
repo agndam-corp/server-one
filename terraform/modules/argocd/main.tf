@@ -8,6 +8,10 @@ terraform {
       source  = "hashicorp/helm"
       version = ">= 2.0"
     }
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = ">= 1.19.0"
+    }
   }
 }
 
@@ -73,4 +77,44 @@ resource "helm_release" "argocd" {
   values = [
     file("${path.module}/../../values/argocd/values.yaml")
   ]
+}
+
+# Wait for ArgoCD to be ready before deploying applications
+resource "null_resource" "wait_for_argocd" {
+  depends_on = [helm_release.argocd]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      echo "Waiting for ArgoCD to be ready..."
+      until KUBECONFIG=${var.kubeconfig_dir}/kubeconfig.yaml kubectl -n argocd get pods --no-headers | grep -E "(Running|Completed)" | wc -l | grep -q "7"; do
+        echo "Waiting for ArgoCD pods to be ready..."
+        sleep 10
+      done
+      echo "ArgoCD is ready!"
+    EOT
+
+    interpreter = ["/bin/bash", "-c"]
+  }
+}
+
+# Deploy the App of Apps definition
+resource "kubectl_manifest" "app_of_apps" {
+  depends_on = [null_resource.wait_for_argocd]
+
+  yaml_body = <<-EOT
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-of-apps
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ${var.argocd_applications_repo_url}
+    path: ${var.argocd_applications_path}
+    targetRevision: HEAD
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+EOT
 }

@@ -9,9 +9,8 @@ kubeconfig_dir = "/home/ubuntu/.kube"
 # GitHub SSH private key path
 github_ssh_private_key_path = "../private/githubconnection"
 
-# MetalLB IP addresses (list of CIDR blocks)
-# Using a range that should be available in your subnet
-metallb_ip_addresses = ["146.59.44.100-146.59.44.110"]
+# ArgoCD applications repository configuration
+argocd_applications_repo_url = "git@github.com:DamianJaskolski95/k8s-server.git"
+argocd_applications_path     = "argocd/prd/applications"
 
-# MetalLB name for pool adresses
-metallb_ip_pool_name = "production"
+
