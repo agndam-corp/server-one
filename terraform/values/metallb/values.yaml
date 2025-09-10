@@ -1,0 +1,37 @@
+# MetalLB configuration values
+# These values configure MetalLB for LoadBalancer services
+
+# Controller configuration
+controller:
+  # Resources for the controller pod
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 100Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 100Mi
+  webhookMode: enabled
+
+# Speaker configuration
+speaker:
+  # Resources for the speaker pods
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 100Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 100Mi
+
+# Prometheus monitoring configuration
+prometheus:
+  # Enable scraping of Prometheus metrics
+  scrapeAnnotations: true
+  # Port for metrics
+  metricsPort: 7472
+
+# RBAC configuration
+rbac:
+  # Create RBAC resources
+  create: true

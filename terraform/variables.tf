@@ -17,3 +17,15 @@ variable "github_ssh_private_key_path" {
   type        = string
   default     = "../private/githubconnection"
 }
+
+variable "metallb_ip_addresses" {
+  description = "IP addresses for MetalLB to use"
+  type        = list(string)
+  default     = ["146.59.45.254/32"]
+}
+
+variable "metallb_ip_pool_name" {
+  description = "Name for pool adresses"
+  type        = string
+  default     = "production"
+}

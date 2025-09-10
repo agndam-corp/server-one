@@ -9,9 +9,7 @@ global:
 server:
   # Service configuration
   service:
-    type: NodePort
-    nodePortHttp: 30080
-    nodePortHttps: 30443
+    type: LoadBalancer
     servicePortHttp: 80
     servicePortHttps: 443
   
