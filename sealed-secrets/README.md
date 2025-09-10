@@ -39,9 +39,9 @@ To add new sealed secrets:
      -o yaml > my-secret.yaml
    ```
 
-2. Seal the secret:
+2. Seal the secret (make sure to specify the controller name and namespace):
    ```bash
-   kubeseal < my-secret.yaml > my-secret-sealed.yaml
+   kubeseal --controller-name sealed-secrets --controller-namespace kube-system < my-secret.yaml > my-secret-sealed.yaml
    ```
 
 3. Add the sealed secret to this directory and commit it to Git.
@@ -52,3 +52,4 @@ To add new sealed secrets:
 - The encryption is one-way - you cannot retrieve the original secret from the sealed secret
 - Store the sealed secrets in Git - they are safe to share publicly
 - Never store unencrypted secrets in Git
+- The sealed secrets controller key is backed up in the private directory for disaster recovery

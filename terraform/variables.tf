@@ -30,4 +30,16 @@ variable "argocd_applications_path" {
   default     = "argocd/prd/applications"
 }
 
+variable "sealed_secrets_key_path" {
+  description = "Path to the sealed secrets key backup file"
+  type        = string
+  default     = "../private/sealed-secrets-key-backup.yaml"
+}
+
+variable "argocd_admin_password_path" {
+  description = "Path to the argocd admin password sealed secret file"
+  type        = string
+  default     = "../sealed-secrets/argocd-admin-password-sealed.yaml"
+}
+
 

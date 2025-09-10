@@ -199,6 +199,23 @@ resource "null_resource" "cluster_ready" {
   }
 }
 
+# Deploy Sealed Secrets
+module "sealed_secrets" {
+  source = "./modules/sealed-secrets"
+
+  providers = {
+    kubernetes = kubernetes
+    helm       = helm
+    kubectl    = kubectl
+  }
+
+  depends_on = [null_resource.cluster_ready]
+
+  kubeconfig_dir              = var.kubeconfig_dir
+  sealed_secrets_key_path     = var.sealed_secrets_key_path
+  argocd_admin_password_path  = var.argocd_admin_password_path
+}
+
 # Deploy ArgoCD
 module "argocd" {
   source = "./modules/argocd"
@@ -209,7 +226,7 @@ module "argocd" {
     kubectl    = kubectl
   }
 
-  depends_on = [null_resource.cluster_ready]
+  depends_on = [module.sealed_secrets]
 
   kubeconfig_dir               = var.kubeconfig_dir
   github_ssh_private_key_path  = var.github_ssh_private_key_path

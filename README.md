@@ -24,8 +24,8 @@ terraform apply
 
 This will:
 - Install K3s cluster
+- Deploy Sealed Secrets controller (from backed up key if available)
 - Deploy ArgoCD
-- Deploy Sealed Secrets controller
 - Deploy all applications via ArgoCD App of Apps pattern
 
 ### 2. Sealed Secrets Generation
@@ -44,6 +44,8 @@ The script will create sealed secrets for:
 - ArgoCD admin password
 - Spaceship API credentials
 - GHCR image pull secret
+
+Note: The Sealed Secrets controller is deployed by Terraform, so make sure to run Terraform apply first.
 
 ### 3. Apply Sealed Secrets
 After generating sealed secrets, apply them to the cluster:
