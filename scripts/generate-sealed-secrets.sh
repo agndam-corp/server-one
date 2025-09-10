@@ -29,6 +29,13 @@ echo "Enter Spaceship API Secret:"
 read -s SPACESHIP_API_SECRET
 echo
 
+# GHCR Credentials
+echo "Enter GHCR Username (GitHub username):"
+read GHCR_USERNAME
+echo "Enter GHCR Personal Access Token:"
+read -s GHCR_TOKEN
+echo
+
 # Create Kubernetes secrets in temporary directory
 echo "Creating Kubernetes secrets..."
 
@@ -47,6 +54,16 @@ kubectl create secret generic spaceship-api-credentials \
   --dry-run=client \
   -o yaml > $TEMP_DIR/spaceship-api-credentials.yaml
 
+# GHCR Image Pull Secret
+kubectl create secret docker-registry ghcr-secret \
+  --docker-server=ghcr.io \
+  --docker-username="$GHCR_USERNAME" \
+  --docker-password="$GHCR_TOKEN" \
+  --docker-email=noreply@github.com \
+  --namespace cert-manager \
+  --dry-run=client \
+  -o yaml > $TEMP_DIR/ghcr-secret.yaml
+
 # Seal the secrets
 echo "Sealing secrets..."
 
@@ -55,6 +72,9 @@ kubeseal < $TEMP_DIR/argocd-admin-password.yaml > /home/ubuntu/project/sealed-se
 
 # Spaceship API Credentials SealedSecret
 kubeseal < $TEMP_DIR/spaceship-api-credentials.yaml > /home/ubuntu/project/sealed-secrets/spaceship-api-credentials-sealed.yaml
+
+# GHCR Image Pull SealedSecret
+kubeseal < $TEMP_DIR/ghcr-secret.yaml > /home/ubuntu/project/sealed-secrets/ghcr-secret-sealed.yaml
 
 # Clean up temporary files
 rm -rf $TEMP_DIR
