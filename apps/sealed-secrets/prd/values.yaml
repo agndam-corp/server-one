@@ -1,0 +1,66 @@
+# Default values for sealed-secrets
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+sealed-secrets:
+  # Sealed Secrets controller configuration
+  controller:
+    # Number of replicas for the controller
+    replicaCount: 1
+    
+    # Image configuration
+    image:
+      registry: docker.io
+      repository: bitnami/sealed-secrets-controller
+      tag: v0.31.0
+      pullPolicy: IfNotPresent
+    
+    # Service configuration
+    service:
+      type: ClusterIP
+      port: 8080
+    
+    # Security context
+    securityContext:
+      enabled: true
+      fsGroup: 65534
+      runAsUser: 1001
+    
+    # Resources
+    resources: {}
+    
+    # Node selector
+    nodeSelector: {}
+    
+    # Tolerations
+    tolerations: []
+    
+    # Affinity
+    affinity: {}
+  
+  # Sealed Secrets admission webhook configuration
+  admissionWebhooks:
+    # Enable admission webhooks
+    enabled: true
+    
+    # Image configuration for the webhook
+    image:
+      registry: docker.io
+      repository: bitnami/sealed-secrets-webhook
+      tag: v0.31.0
+      pullPolicy: IfNotPresent
+    
+    # Service configuration for the webhook
+    service:
+      type: ClusterIP
+      port: 443
+    
+    # Certificate configuration for the webhook
+    certificate:
+      # Generate a new certificate for the webhook
+      generate: true
+  
+  # Sealed Secrets CRD configuration
+  crd:
+    # Install the CRDs
+    install: true
