@@ -25,12 +25,12 @@ output "check_nodes_command" {
 # ArgoCD outputs
 output "argocd_http_url" {
   description = "The HTTP URL to access ArgoCD"
-  value       = "http://localhost:30080"
+  value       = "http://localhost:31080"
 }
 
 output "argocd_https_url" {
   description = "The HTTPS URL to access ArgoCD"
-  value       = "https://localhost:30443"
+  value       = "https://localhost:31443"
 }
 
 output "argocd_get_password_command" {
