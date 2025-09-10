@@ -68,13 +68,13 @@ kubectl create secret docker-registry ghcr-secret \
 echo "Sealing secrets..."
 
 # ArgoCD Admin Password SealedSecret
-kubeseal < $TEMP_DIR/argocd-admin-password.yaml > /home/ubuntu/project/sealed-secrets/argocd-admin-password-sealed.yaml
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/argocd-admin-password.yaml > /home/ubuntu/project/sealed-secrets/argocd-admin-password-sealed.yaml
 
 # Spaceship API Credentials SealedSecret
-kubeseal < $TEMP_DIR/spaceship-api-credentials.yaml > /home/ubuntu/project/sealed-secrets/spaceship-api-credentials-sealed.yaml
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/spaceship-api-credentials.yaml > /home/ubuntu/project/sealed-secrets/spaceship-api-credentials-sealed.yaml
 
 # GHCR Image Pull SealedSecret
-kubeseal < $TEMP_DIR/ghcr-secret.yaml > /home/ubuntu/project/sealed-secrets/ghcr-secret-sealed.yaml
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/ghcr-secret.yaml > /home/ubuntu/project/sealed-secrets/ghcr-secret-sealed.yaml
 
 # Clean up temporary files
 rm -rf $TEMP_DIR
