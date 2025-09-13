@@ -39,7 +39,7 @@ variable "sealed_secrets_key_path" {
 variable "argocd_admin_password_path" {
   description = "Path to the argocd admin password sealed secret file"
   type        = string
-  default     = "../sealed-secrets/argocd-admin-password-sealed.yaml"
+  default     = "../sealed-secrets/prd/argocd-admin-password-sealed.yaml"
 }
 
 
