@@ -15,13 +15,6 @@ terraform {
   }
 }
 
-# Create kube-system namespace if it doesn't exist
-resource "kubernetes_namespace" "kube_system" {
-  metadata {
-    name = "kube-system"
-  }
-}
-
 # Check if sealed secrets key already exists
 data "kubectl_file_documents" "sealed_secrets_key" {
   content = fileexists("${var.sealed_secrets_key_path}") ? file("${var.sealed_secrets_key_path}") : ""
@@ -29,15 +22,14 @@ data "kubectl_file_documents" "sealed_secrets_key" {
 
 # Apply the sealed secrets key if it exists
 resource "kubectl_manifest" "sealed_secrets_key" {
-  count      = fileexists("${var.sealed_secrets_key_path}") ? 1 : 0
-  depends_on = [kubernetes_namespace.kube_system]
+  count = fileexists("${var.sealed_secrets_key_path}") ? 1 : 0
 
   yaml_body = data.kubectl_file_documents.sealed_secrets_key.documents[0]
 }
 
 # Install Sealed Secrets using Helm
 resource "helm_release" "sealed_secrets" {
-  depends_on = [kubernetes_namespace.kube_system, kubectl_manifest.sealed_secrets_key]
+  depends_on = [kubectl_manifest.sealed_secrets_key]
 
   name       = "sealed-secrets"
   repository = "https://bitnami-labs.github.io/sealed-secrets"

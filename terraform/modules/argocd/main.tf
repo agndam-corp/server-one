@@ -130,7 +130,7 @@ resource "null_resource" "wait_for_cert_manager" {
   provisioner "local-exec" {
     command = <<-EOT
       echo "Waiting for cert-manager to be ready..."
-      until KUBECONFIG=${var.kubeconfig_dir}/kubeconfig.yaml kubectl -n cert-manager get pods --no-headers | grep -E "(Running|Completed)" | wc -l | grep -q "1"; do
+      until KUBECONFIG=${var.kubeconfig_dir}/kubeconfig.yaml kubectl -n cert-manager get pods --no-headers | grep -E "(Running|Completed)" | wc -l | grep -q "4"; do
         echo "Waiting for cert-manager pods to be ready..."
         sleep 10
       done
@@ -160,73 +160,19 @@ resource "null_resource" "wait_for_certificates" {
 }
 
 # Update Traefik service to remove port 80
-resource "kubectl_manifest" "traefik_service_update" {
+resource "null_resource" "traefik_service_update" {
   depends_on = [null_resource.wait_for_certificates]
-  
-  yaml_body = <<-EOT
-apiVersion: v1
-kind: Service
-metadata:
-  name: traefik
-  namespace: kube-system
-  annotations:
-    meta.helm.sh/release-name: traefik
-    meta.helm.sh/release-namespace: kube-system
-  labels:
-    app.kubernetes.io/instance: traefik-kube-system
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-34.2.1_up34.2.0
-spec:
-  allocateLoadBalancerNodePorts: true
-  externalTrafficPolicy: Cluster
-  ports:
-  - name: websecure
-    nodePort: 32286
-    port: 443
-    protocol: TCP
-    targetPort: websecure
-  selector:
-    app.kubernetes.io/instance: traefik-kube-system
-    app.kubernetes.io/name: traefik
-  type: LoadBalancer
-EOT
+
+  provisioner "local-exec" {
+    command = "KUBECONFIG=${var.kubeconfig_dir}/kubeconfig.yaml kubectl apply -f ${path.module}/manifests/traefik-service.yaml"
+  }
 }
 
 # Update ArgoCD service to remove NodePort access
-resource "kubectl_manifest" "argocd_service_update" {
+resource "null_resource" "argocd_service_update" {
   depends_on = [null_resource.wait_for_certificates]
-  
-  yaml_body = <<-EOT
-apiVersion: v1
-kind: Service
-metadata:
-  name: argocd-server
-  namespace: argocd
-  annotations:
-    meta.helm.sh/release-name: argocd
-    meta.helm.sh/release-namespace: argocd
-  labels:
-    app.kubernetes.io/component: server
-    app.kubernetes.io/instance: argocd
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: argocd-server
-    app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v3.1.4
-    helm.sh/chart: argo-cd-8.3.5
-spec:
-  ports:
-  - name: http
-    port: 80
-    protocol: TCP
-    targetPort: 8080
-  - name: https
-    port: 443
-    protocol: TCP
-    targetPort: 8080
-  selector:
-    app.kubernetes.io/instance: argocd
-    app.kubernetes.io/name: argocd-server
-  type: ClusterIP
-EOT
+
+  provisioner "local-exec" {
+    command = "KUBECONFIG=${var.kubeconfig_dir}/kubeconfig.yaml kubectl apply -f ${path.module}/manifests/argocd-service.yaml"
+  }
 }
