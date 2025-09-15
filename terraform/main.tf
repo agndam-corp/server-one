@@ -61,10 +61,28 @@ spec:
         nodePort: 32286
 EOF
       
+      # Create K3s service configuration with memory limits
+      mkdir -p /etc/systemd/system/k3s.service.d
+      cat > /etc/systemd/system/k3s.service.d/memory-limit.conf << 'EOF'
+[Service]
+MemoryLimit=6G
+EOF
+      
       # Download and install K3s with encryption enabled and kubeconfig written
       # Using --write-kubeconfig-mode 644 to make kubeconfig readable
       # Using --secrets-encryption to enable secrets encryption
-      curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644 --secrets-encryption
+      # Disabling metrics-server to reduce memory footprint
+      # Additional optimizations for memory usage
+      curl -sfL https://get.k3s.io | sh -s - 
+        --write-kubeconfig-mode 644 
+        --secrets-encryption 
+        --disable metrics-server 
+        --kubelet-arg "max-pods=50" 
+        --kube-apiserver-arg "default-watch-cache-size=100" 
+        --kube-apiserver-arg "watch-cache-sizes=Endpoints=100,Service=100" 
+        --kube-controller-arg "node-monitor-period=10s" 
+        --kube-controller-arg "node-monitor-grace-period=30s"
+
       
       # Wait for K3s to be ready
       until sudo k3s kubectl get nodes &>/dev/null; do

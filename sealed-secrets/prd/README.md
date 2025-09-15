@@ -23,7 +23,7 @@ Sealed Secrets is a Kubernetes controller and tool for one-way encrypted Secrets
 ## Current Sealed Secrets
 
 - `argocd-admin-password-sealed.yaml` - ArgoCD admin password
-- `spaceship-api-credentials-sealed.yaml` - Spaceship API credentials
+- `spaceship-api-key-sealed.yaml` - Spaceship API credentials
 - `ghcr-secret-sealed.yaml` - GHCR image pull secret
 
 ## Adding New Sealed Secrets

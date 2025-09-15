@@ -47,12 +47,12 @@ kubectl create secret generic argocd-admin-password \
   -o yaml > $TEMP_DIR/argocd-admin-password.yaml
 
 # Spaceship API Credentials Secret
-kubectl create secret generic spaceship-api-credentials \
+kubectl create secret generic spaceship-api-key \
   --from-literal=api-key="$SPACESHIP_API_KEY" \
   --from-literal=api-secret="$SPACESHIP_API_SECRET" \
   --namespace cert-manager \
   --dry-run=client \
-  -o yaml > $TEMP_DIR/spaceship-api-credentials.yaml
+  -o yaml > $TEMP_DIR/spaceship-api-key.yaml
 
 # GHCR Image Pull Secret
 kubectl create secret docker-registry ghcr-secret \
@@ -71,7 +71,7 @@ echo "Sealing secrets..."
 kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/argocd-admin-password.yaml > /home/ubuntu/project/sealed-secrets/argocd-admin-password-sealed.yaml
 
 # Spaceship API Credentials SealedSecret
-kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/spaceship-api-credentials.yaml > /home/ubuntu/project/sealed-secrets/spaceship-api-credentials-sealed.yaml
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/spaceship-api-key.yaml > /home/ubuntu/project/sealed-secrets/spaceship-api-key-sealed.yaml
 
 # GHCR Image Pull SealedSecret
 kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/ghcr-secret.yaml > /home/ubuntu/project/sealed-secrets/ghcr-secret-sealed.yaml
