@@ -16,8 +16,8 @@ spec:
           config:
             baseUrl: https://spaceship.dev/api
             apiKeyRef:
-              name: spaceship-api-key
+              name: spaceship-api-credentials
               key: api-key
             apiSecretRef:
-              name: spaceship-api-key
+              name: spaceship-api-credentials
               key: api-secret
