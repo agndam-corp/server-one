@@ -81,7 +81,13 @@ EOF
       curl -sfL https://get.k3s.io | sh -s - \
         --write-kubeconfig-mode 644 \
         --secrets-encryption \
-        --disable metrics-server
+        --kubelet-arg="kube-reserved=cpu=100m,memory=200Mi" \
+        --kubelet-arg="system-reserved=cpu=100m,memory=200Mi" \
+        --snapshotter native \
+        --kubelet-arg="metric-resolution=15s" \
+        --disable servicelb \
+        --disable local-storage
+      #  --disable metrics-server
 
       # Wait for K3s to be ready
       until sudo k3s kubectl get nodes &>/dev/null; do
