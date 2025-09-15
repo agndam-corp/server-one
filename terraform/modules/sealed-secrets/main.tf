@@ -77,32 +77,9 @@ data "kubectl_file_documents" "argocd_admin_password" {
   content = fileexists("${var.argocd_admin_password_path}") ? file("${var.argocd_admin_password_path}") : ""
 }
 
-# Wait for ArgoCD namespace to exist
-resource "null_resource" "wait_for_argocd_namespace" {
-  count = fileexists("${var.argocd_admin_password_path}") ? 1 : 0
-
-  provisioner "local-exec" {
-    command = <<-EOT
-      echo "Waiting for ArgoCD namespace to be created..."
-      timeout=120
-      start_time=$(date +%s)
-      until KUBECONFIG=${var.kubeconfig_dir}/kubeconfig.yaml kubectl get namespace argocd &>/dev/null; do
-        current_time=$(date +%s)
-        elapsed_time=$((current_time - start_time))
-        if [ $elapsed_time -gt $timeout ]; then
-          echo "Timeout waiting for ArgoCD namespace"
-          exit 1
-        fi
-        echo "Still waiting for ArgoCD namespace to be created..."
-        sleep 5
-      done
-      echo "ArgoCD namespace exists!"
-    EOT
-
-    interpreter = ["/bin/bash", "-c"]
-  }
-
-  depends_on = [helm_release.sealed_secrets, null_resource.wait_for_k8s_api]
+# Check if argocd admin password sealed secret exists
+data "kubectl_file_documents" "argocd_admin_password" {
+  content = fileexists("${var.argocd_admin_password_path}") ? file("${var.argocd_admin_password_path}") : ""
 }
 
 # Data source to check if ArgoCD namespace exists
@@ -111,14 +88,12 @@ data "kubernetes_namespace" "argocd" {
   metadata {
     name = "argocd"
   }
-  
-  depends_on = [null_resource.wait_for_argocd_namespace]
 }
 
 # Apply the argocd admin password sealed secret if it exists
 resource "kubectl_manifest" "argocd_admin_password" {
   count      = fileexists("${var.argocd_admin_password_path}") ? 1 : 0
-  depends_on = [helm_release.sealed_secrets, null_resource.wait_for_k8s_api, null_resource.wait_for_argocd_namespace, data.kubernetes_namespace.argocd]
+  depends_on = [helm_release.sealed_secrets, null_resource.wait_for_k8s_api, data.kubernetes_namespace.argocd]
 
   yaml_body = data.kubectl_file_documents.argocd_admin_password.documents[0]
 }

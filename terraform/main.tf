@@ -216,6 +216,35 @@ resource "null_resource" "cluster_ready" {
   }
 }
 
+# Create all required namespaces before deploying modules
+module "namespaces" {
+  source = "./modules/namespaces"
+
+  providers = {
+    kubernetes = kubernetes
+  }
+
+  depends_on = [null_resource.cluster_ready]
+
+  namespaces = {
+    "argocd" = {
+      labels = {
+        "app.kubernetes.io/managed-by" = "terraform"
+      }
+    }
+    "cert-manager" = {
+      labels = {
+        "app.kubernetes.io/managed-by" = "terraform"
+      }
+    }
+    "kube-system" = {
+      labels = {
+        "app.kubernetes.io/managed-by" = "terraform"
+      }
+    }
+  }
+}
+
 # Deploy Sealed Secrets
 module "sealed_secrets" {
   source = "./modules/sealed-secrets"
@@ -226,7 +255,7 @@ module "sealed_secrets" {
     kubectl    = kubectl
   }
 
-  depends_on = [null_resource.cluster_ready]
+  depends_on = [module.namespaces]
 
   kubeconfig_dir             = var.kubeconfig_dir
   sealed_secrets_key_path    = var.sealed_secrets_key_path
