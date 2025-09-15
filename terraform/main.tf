@@ -216,6 +216,32 @@ resource "null_resource" "cluster_ready" {
   }
 }
 
+# Wait for Kubernetes API to be ready before applying manifests
+resource "null_resource" "wait_for_k8s_api" {
+  depends_on = [null_resource.cluster_ready]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      echo "Waiting for Kubernetes API to be ready..."
+      timeout=300
+      start_time=$(date +%s)
+      until KUBECONFIG=${var.kubeconfig_dir}/kubeconfig.yaml kubectl cluster-info &>/dev/null; do
+        current_time=$(date +%s)
+        elapsed_time=$((current_time - start_time))
+        if [ $elapsed_time -gt $timeout ]; then
+          echo "Timeout waiting for Kubernetes API"
+          exit 1
+        fi
+        echo "Still waiting for Kubernetes API to be ready..."
+        sleep 10
+      done
+      echo "Kubernetes API is ready!"
+    EOT
+
+    interpreter = ["/bin/bash", "-c"]
+  }
+}
+
 # Create all required namespaces before deploying modules
 module "namespaces" {
   source = "./modules/namespaces"
@@ -224,7 +250,7 @@ module "namespaces" {
     kubernetes = kubernetes
   }
 
-  depends_on = [null_resource.cluster_ready]
+  depends_on = [null_resource.wait_for_k8s_api]
 
   namespaces = {
     "argocd" = {
