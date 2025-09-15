@@ -86,7 +86,7 @@ resource "null_resource" "wait_for_argocd" {
   provisioner "local-exec" {
     command = <<-EOT
       echo "Waiting for ArgoCD to be ready..."
-      until KUBECONFIG=${var.kubeconfig_dir}/kubeconfig.yaml kubectl -n argocd get pods --no-headers | grep -E "(Running|Completed)" | wc -l | grep -q "7"; do
+      until KUBECONFIG=${var.kubeconfig_dir}/kubeconfig.yaml kubectl -n argocd get pods --field-selector=status.phase!=Succeeded,status.phase!=Failed --no-headers | grep -E "Running" | wc -l | grep -q "7"; do
         echo "Waiting for ArgoCD pods to be ready..."
         sleep 10
       done
@@ -130,7 +130,7 @@ resource "null_resource" "wait_for_cert_manager" {
   provisioner "local-exec" {
     command = <<-EOT
       echo "Waiting for cert-manager to be ready..."
-      until KUBECONFIG=${var.kubeconfig_dir}/kubeconfig.yaml kubectl -n cert-manager get pods --no-headers | grep -E "(Running|Completed)" | wc -l | grep -q "4"; do
+      until KUBECONFIG=${var.kubeconfig_dir}/kubeconfig.yaml kubectl -n cert-manager get pods --field-selector=status.phase!=Succeeded,status.phase!=Failed --no-headers | grep -E "Running" | wc -l | grep -q "4"; do
         echo "Waiting for cert-manager pods to be ready..."
         sleep 10
       done

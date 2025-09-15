@@ -37,10 +37,10 @@ server:
   resources:
     limits:
       cpu: 100m
-      memory: 128Mi
+      memory: 64Mi
     requests:
       cpu: 50m
-      memory: 64Mi
+      memory: 32Mi
 
 # Configuration parameters
 configs:
@@ -71,27 +71,27 @@ repoServer:
   resources:
     limits:
       cpu: 100m
-      memory: 128Mi
+      memory: 32Mi
     requests:
       cpu: 50m
-      memory: 64Mi
+      memory: 16Mi
 
 # Dex Server configuration
 dex:
   resources:
     limits:
       cpu: 50m
-      memory: 64Mi
+      memory: 16Mi
     requests:
       cpu: 10m
-      memory: 32Mi
+      memory: 8Mi
 
 # Redis configuration
 redis:
   resources:
     limits:
       cpu: 50m
-      memory: 64Mi
+      memory: 16Mi
     requests:
       cpu: 10m
-      memory: 32Mi
+      memory: 8Mi

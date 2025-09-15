@@ -7,16 +7,16 @@ provider "null" {
 
 provider "helm" {
   kubernetes {
-    config_path = "${var.kubeconfig_dir}/kubeconfig.yaml"
+    config_path = fileexists("${var.kubeconfig_dir}/kubeconfig.yaml") ? "${var.kubeconfig_dir}/kubeconfig.yaml" : null
   }
 }
 
 provider "kubernetes" {
-  config_path = "${var.kubeconfig_dir}/kubeconfig.yaml"
+  config_path = fileexists("${var.kubeconfig_dir}/kubeconfig.yaml") ? "${var.kubeconfig_dir}/kubeconfig.yaml" : null
 }
 
 provider "kubectl" {
-  config_path = "${var.kubeconfig_dir}/kubeconfig.yaml"
+  config_path = fileexists("${var.kubeconfig_dir}/kubeconfig.yaml") ? "${var.kubeconfig_dir}/kubeconfig.yaml" : null
 }
 
 # Resource to clean up any existing K3s installation
@@ -27,15 +27,7 @@ resource "null_resource" "cleanup_k3s" {
 
   provisioner "local-exec" {
     when    = destroy
-    command = <<-EOT
-      # Remove swap file
-      sudo swapoff /swapfile 2>/dev/null || true
-      sudo rm -f /swapfile
-      sudo sed -i '/swapfile/d' /etc/fstab 2>/dev/null || true
-      
-      # Run the cleanup script
-      ${path.module}/cleanup.sh
-    EOT
+    command = "${path.module}/cleanup.sh"
   }
 }
 
@@ -52,20 +44,12 @@ resource "null_resource" "install_k3s" {
   # Provisioner to download and install K3s with encryption and kubeconfig options
   provisioner "local-exec" {
     command = <<-EOT
-      # Create swap space to prevent OOM kills
-      sudo fallocate -l 1G /swapfile
-      sudo chmod 600 /swapfile
-      sudo mkswap /swapfile
-      sudo swapon /swapfile
-      echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-      
-      # Set swappiness to a lower value to prefer using RAM
-      echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
-      sudo sysctl -p
+      # Create directories with proper permissions
+      sudo mkdir -p /var/lib/rancher/k3s/server/manifests
+      sudo mkdir -p /etc/systemd/system/k3s.service.d
       
       # Create Traefik config with fixed node ports before installing K3s
-      mkdir -p /var/lib/rancher/k3s/server/manifests
-      cat > /var/lib/rancher/k3s/server/manifests/traefik-config.yaml << 'EOF'
+      cat > /tmp/traefik-config.yaml << 'EOF'
 apiVersion: helm.cattle.io/v1
 kind: HelmChartConfig
 metadata:
@@ -79,29 +63,26 @@ spec:
       websecure:
         nodePort: 32286
 EOF
+      sudo mv /tmp/traefik-config.yaml /var/lib/rancher/k3s/server/manifests/traefik-config.yaml
       
       # Create K3s service configuration with memory limits
-      mkdir -p /etc/systemd/system/k3s.service.d
-      cat > /etc/systemd/system/k3s.service.d/memory-limit.conf << 'EOF'
+      cat > /tmp/memory-limit.conf << 'EOF'
 [Service]
-MemoryLimit=5G
+MemoryMax=5G
 EOF
+      sudo mv /tmp/memory-limit.conf /etc/systemd/system/k3s.service.d/memory-limit.conf
       
       # Download and install K3s with encryption enabled and kubeconfig written
       # Using --write-kubeconfig-mode 644 to make kubeconfig readable
       # Using --secrets-encryption to enable secrets encryption
       # Disabling metrics-server to reduce memory footprint
       # Additional optimizations for memory usage
-      curl -sfL https://get.k3s.io | sh -s - \\
-        --write-kubeconfig-mode 644 \\
-        --secrets-encryption \\
-        --disable metrics-server \\
-        --kubelet-arg "max-pods=50" \\
-        --kube-apiserver-arg "default-watch-cache-size=100" \\
-        --kube-apiserver-arg "watch-cache-sizes=Endpoints=100,Service=100" \\
-        --kube-controller-arg "node-monitor-period=10s" \\
-        --kube-controller-arg "node-monitor-grace-period=30s"
-      
+      # Setting a custom token to avoid token format issues
+      curl -sfL https://get.k3s.io | sh -s - \
+        --write-kubeconfig-mode 644 \
+        --secrets-encryption \
+        --disable metrics-server
+
       # Wait for K3s to be ready
       until sudo k3s kubectl get nodes &>/dev/null; do
         echo "Waiting for K3s to be ready..."
@@ -247,9 +228,9 @@ module "sealed_secrets" {
 
   depends_on = [null_resource.cluster_ready]
 
-  kubeconfig_dir              = var.kubeconfig_dir
-  sealed_secrets_key_path     = var.sealed_secrets_key_path
-  argocd_admin_password_path  = var.argocd_admin_password_path
+  kubeconfig_dir             = var.kubeconfig_dir
+  sealed_secrets_key_path    = var.sealed_secrets_key_path
+  argocd_admin_password_path = var.argocd_admin_password_path
 }
 
 # Deploy ArgoCD

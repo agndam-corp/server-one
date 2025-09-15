@@ -14,7 +14,7 @@ argocd_applications_repo_url = "git@github.com:DamianJaskolski95/k8s-server.git"
 argocd_applications_path     = "argocd/prd/applications"
 
 # Sealed Secrets configuration
-sealed_secrets_key_path     = "../private/sealed-secrets-key-backup.yaml"
-argocd_admin_password_path  = "../sealed-secrets/argocd-admin-password-sealed.yaml"
+sealed_secrets_key_path    = "../private/sealed-secrets-key-backup.yaml"
+argocd_admin_password_path = "../sealed-secrets/prd/argocd-admin-password-sealed.yaml"
 
 
