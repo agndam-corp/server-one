@@ -32,6 +32,15 @@ server:
   # Server parameters
   config:
     server.insecure: true
+  
+  # Resource limits based on actual usage + buffer
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
 
 # Configuration parameters
 configs:
@@ -46,3 +55,43 @@ configs:
     existingSecret: "argocd-admin-password"
     # Key in the existing secret that contains the password
     existingSecretKey: "password"
+
+# Application Controller configuration
+applicationController:
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# Repo Server configuration
+repoServer:
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+# Dex Server configuration
+dex:
+  resources:
+    limits:
+      cpu: 50m
+      memory: 64Mi
+    requests:
+      cpu: 10m
+      memory: 32Mi
+
+# Redis configuration
+redis:
+  resources:
+    limits:
+      cpu: 50m
+      memory: 64Mi
+    requests:
+      cpu: 10m
+      memory: 32Mi
