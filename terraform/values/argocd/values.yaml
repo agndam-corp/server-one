@@ -70,21 +70,21 @@ applicationController:
 repoServer:
   resources:
     limits:
+      cpu: 200m
+      memory: 128Mi
+    requests:
       cpu: 100m
       memory: 32Mi
-    requests:
-      cpu: 50m
-      memory: 16Mi
 
 # Dex Server configuration
 dex:
   resources:
     limits:
       cpu: 50m
-      memory: 16Mi
+      memory: 64Mi
     requests:
       cpu: 10m
-      memory: 8Mi
+      memory: 16Mi
 
 # Redis configuration
 redis:

@@ -235,6 +235,10 @@ resource "null_resource" "wait_for_k8s_api" {
         echo "Still waiting for Kubernetes API to be ready..."
         sleep 10
       done
+      
+      # Additional wait to ensure kubeconfig is fully written and API is completely ready
+      sleep 10
+      
       echo "Kubernetes API is ready!"
     EOT
 
@@ -242,33 +246,35 @@ resource "null_resource" "wait_for_k8s_api" {
   }
 }
 
-# Create all required namespaces before deploying modules
-module "namespaces" {
-  source = "./modules/namespaces"
-
-  providers = {
-    kubernetes = kubernetes
-  }
-
+# Create required namespaces using kubectl provider
+resource "kubectl_manifest" "namespace_argocd" {
   depends_on = [null_resource.wait_for_k8s_api]
 
-  namespaces = {
-    "argocd" = {
-      labels = {
-        "app.kubernetes.io/managed-by" = "terraform"
-      }
-    }
-    "cert-manager" = {
-      labels = {
-        "app.kubernetes.io/managed-by" = "terraform"
-      }
-    }
-    "kube-system" = {
-      labels = {
-        "app.kubernetes.io/managed-by" = "terraform"
-      }
-    }
-  }
+  yaml_body = <<YAML
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+  labels:
+    app.kubernetes.io/managed-by: terraform
+YAML
+
+  provider = kubectl
+}
+
+resource "kubectl_manifest" "namespace_cert_manager" {
+  depends_on = [null_resource.wait_for_k8s_api]
+
+  yaml_body = <<YAML
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
+  labels:
+    app.kubernetes.io/managed-by: terraform
+YAML
+
+  provider = kubectl
 }
 
 # Deploy Sealed Secrets
@@ -281,7 +287,7 @@ module "sealed_secrets" {
     kubectl    = kubectl
   }
 
-  depends_on = [module.namespaces]
+  depends_on = [kubectl_manifest.namespace_argocd, kubectl_manifest.namespace_cert_manager]
 
   kubeconfig_dir             = var.kubeconfig_dir
   sealed_secrets_key_path    = var.sealed_secrets_key_path
