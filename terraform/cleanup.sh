@@ -6,6 +6,11 @@
 echo "Stopping K3s service..."
 sudo systemctl stop k3s || true
 
+echo "Removing swap file..."
+sudo swapoff /swapfile 2>/dev/null || true
+sudo rm -f /swapfile
+sudo sed -i '/swapfile/d' /etc/fstab 2>/dev/null || true
+
 echo "Removing K3s using official uninstall script..."
 if [ -f /usr/local/bin/k3s-uninstall.sh ]; then
   sudo /usr/local/bin/k3s-uninstall.sh

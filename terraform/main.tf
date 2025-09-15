@@ -27,7 +27,15 @@ resource "null_resource" "cleanup_k3s" {
 
   provisioner "local-exec" {
     when    = destroy
-    command = "${path.module}/cleanup.sh"
+    command = <<-EOT
+      # Remove swap file
+      sudo swapoff /swapfile 2>/dev/null || true
+      sudo rm -f /swapfile
+      sudo sed -i '/swapfile/d' /etc/fstab 2>/dev/null || true
+      
+      # Run the cleanup script
+      ${path.module}/cleanup.sh
+    EOT
   }
 }
 
@@ -44,6 +52,17 @@ resource "null_resource" "install_k3s" {
   # Provisioner to download and install K3s with encryption and kubeconfig options
   provisioner "local-exec" {
     command = <<-EOT
+      # Create swap space to prevent OOM kills
+      sudo fallocate -l 1G /swapfile
+      sudo chmod 600 /swapfile
+      sudo mkswap /swapfile
+      sudo swapon /swapfile
+      echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+      
+      # Set swappiness to a lower value to prefer using RAM
+      echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
+      sudo sysctl -p
+      
       # Create Traefik config with fixed node ports before installing K3s
       mkdir -p /var/lib/rancher/k3s/server/manifests
       cat > /var/lib/rancher/k3s/server/manifests/traefik-config.yaml << 'EOF'
@@ -65,7 +84,7 @@ EOF
       mkdir -p /etc/systemd/system/k3s.service.d
       cat > /etc/systemd/system/k3s.service.d/memory-limit.conf << 'EOF'
 [Service]
-MemoryLimit=6G
+MemoryLimit=5G
 EOF
       
       # Download and install K3s with encryption enabled and kubeconfig written
@@ -73,16 +92,15 @@ EOF
       # Using --secrets-encryption to enable secrets encryption
       # Disabling metrics-server to reduce memory footprint
       # Additional optimizations for memory usage
-      curl -sfL https://get.k3s.io | sh -s - 
-        --write-kubeconfig-mode 644 
-        --secrets-encryption 
-        --disable metrics-server 
-        --kubelet-arg "max-pods=50" 
-        --kube-apiserver-arg "default-watch-cache-size=100" 
-        --kube-apiserver-arg "watch-cache-sizes=Endpoints=100,Service=100" 
-        --kube-controller-arg "node-monitor-period=10s" 
+      curl -sfL https://get.k3s.io | sh -s - \\
+        --write-kubeconfig-mode 644 \\
+        --secrets-encryption \\
+        --disable metrics-server \\
+        --kubelet-arg "max-pods=50" \\
+        --kube-apiserver-arg "default-watch-cache-size=100" \\
+        --kube-apiserver-arg "watch-cache-sizes=Endpoints=100,Service=100" \\
+        --kube-controller-arg "node-monitor-period=10s" \\
         --kube-controller-arg "node-monitor-grace-period=30s"
-
       
       # Wait for K3s to be ready
       until sudo k3s kubectl get nodes &>/dev/null; do
@@ -205,9 +223,9 @@ resource "null_resource" "cluster_ready" {
   provisioner "local-exec" {
     command = <<-EOT
       echo "Waiting for cluster to be fully ready..."
-      # Wait for core system pods to be running
-      until sudo k3s kubectl wait --for=condition=Ready pods --all -A --timeout=300s &>/dev/null; do
-        echo "Waiting for all pods to be ready..."
+      # Wait for core system pods to be running (excluding completed jobs)
+      until sudo k3s kubectl wait --for=condition=Ready pods --all -A --field-selector=status.phase!=Succeeded,status.phase!=Failed --timeout=300s &>/dev/null; do
+        echo "Waiting for all active pods to be ready..."
         sleep 30
       done
       echo "Cluster is fully ready!"
