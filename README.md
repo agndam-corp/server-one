@@ -65,12 +65,16 @@ After applying sealed secrets, ArgoCD automatically deploys all applications thr
 **Phase 2 (ArgoCD Deployed)**:
 - All other sealed secrets from the `sealed-secrets/` directory
 - cert-manager with custom webhook for Spaceship DNS
+- AdGuard Home DNS ad-blocker
 - And any other applications defined in the `argocd/prd/applications/` directory
 
 ## Directory Structure
 
-- `apps/` - Application Helm charts
+- `apps/` - Application manifests (Helm charts and Kustomize)
+  - `adguard-home/` - AdGuard Home DNS ad-blocker
+  - `cert-manager/` - Certificate management with Let's Encrypt
 - `argocd/` - ArgoCD configuration and applications
+  - `prd/applications/` - ArgoCD Application manifests for each deployed service
 - `namespaces/` - Kubernetes namespace definitions
 - `scripts/` - Utility scripts
 - `sealed-secrets/` - Sealed secrets for sensitive data

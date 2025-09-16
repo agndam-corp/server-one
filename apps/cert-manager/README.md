@@ -9,3 +9,9 @@ This chart deploys cert-manager to the cluster using the official Helm chart as 
 ## Configuration
 
 The cert-manager can be configured through the `cert-manager` section in values.yaml.
+
+## Certificates
+
+This deployment manages the following certificates:
+- ArgoCD certificate for argocd.djasko.com
+- AdGuard Home certificate for dns-adg.djasko.com
