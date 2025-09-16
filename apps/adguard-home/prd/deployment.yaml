@@ -26,9 +26,6 @@ spec:
         - containerPort: 53
           name: dns-udp
           protocol: UDP
-        volumeMounts:
-        - name: data-volume
-          mountPath: /opt/adguardhome
         resources:
           requests:
             memory: "256Mi"
@@ -36,6 +33,3 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "500m"
-      volumes:
-      - name: data-volume
-        emptyDir: {}
