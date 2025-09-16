@@ -46,6 +46,10 @@ Since AdGuard Home modifies its configuration at runtime, we use a GitOps approa
 
 To manually trigger the configuration apply job:
 ```bash
+# Unsuspend and start the job
+kubectl patch job adguard-home-apply-config -n adguard-home -p '{"spec":{"suspend":false}}'
+
+# Or create a new job from the template
 kubectl create job --from=job/adguard-home-apply-config adguard-home-apply-config-manual-$(date +%s) -n adguard-home
 ```
 

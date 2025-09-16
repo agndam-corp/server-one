@@ -10,10 +10,6 @@ spec:
       port: 80
       targetPort: 80
       protocol: TCP
-    - name: https
-      port: 443
-      targetPort: 443
-      protocol: TCP
     - name: dns-tcp
       port: 53
       targetPort: 53
@@ -22,8 +18,4 @@ spec:
       port: 53
       targetPort: 53
       protocol: UDP
-    - name: dns-over-tls
-      port: 853
-      targetPort: 853
-      protocol: TCP
   type: ClusterIP
