@@ -278,6 +278,21 @@ YAML
   provider = kubectl
 }
 
+resource "kubectl_manifest" "namespace_adguard_home" {
+  depends_on = [null_resource.wait_for_k8s_api]
+
+  yaml_body = <<YAML
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: adguard-home
+  labels:
+    app.kubernetes.io/managed-by: terraform
+YAML
+
+  provider = kubectl
+}
+
 # Deploy Sealed Secrets
 module "sealed_secrets" {
   source = "./modules/sealed-secrets"

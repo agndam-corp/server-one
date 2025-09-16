@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adguard-home
+  labels:
+    app: adguard-home
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adguard-home
+  template:
+    metadata:
+      labels:
+        app: adguard-home
+    spec:
+      containers:
+      - name: adguard-home
+        image: adguard/adguardhome:v0.107.66
+        ports:
+        - containerPort: 80
+          name: http
+        - containerPort: 443
+          name: https
+        - containerPort: 53
+          name: dns-tcp
+          protocol: TCP
+        - containerPort: 53
+          name: dns-udp
+          protocol: UDP
+        - containerPort: 853
+          name: dns-over-tls
+        env:
+        - name: TLS_CERT_PATH
+          value: /tls/tls.crt
+        - name: TLS_KEY_PATH
+          value: /tls/tls.key
+        volumeMounts:
+        - name: config-volume
+          mountPath: /opt/adguardhome/conf
+        - name: data-volume
+          mountPath: /opt/adguardhome/work
+        - name: tls-volume
+          mountPath: /tls
+          readOnly: true
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: config-volume
+        configMap:
+          name: adguard-home-config
+      - name: data-volume
+        emptyDir: {}
+      - name: tls-volume
+        secret:
+          secretName: adguard-home-djasko-com-tls

@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: adguard-home-djasko-com
+  namespace: adguard-home
+spec:
+  secretName: adguard-home-djasko-com-tls
+  issuerRef:
+    name: letsencrypt-production-spaceship
+    kind: ClusterIssuer
+  dnsNames:
+  - dns-adg.djasko.com

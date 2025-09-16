@@ -45,24 +45,3 @@ resource "helm_release" "sealed_secrets" {
     file("${path.module}/../../values/sealed-secrets/values.yaml")
   ]
 }
-
-# Check if argocd admin password sealed secret exists
-data "kubectl_file_documents" "argocd_admin_password" {
-  content = fileexists("${var.argocd_admin_password_path}") ? file("${var.argocd_admin_password_path}") : ""
-}
-
-# Data source to check if ArgoCD namespace exists
-data "kubernetes_namespace" "argocd_ns" {
-  count = fileexists("${var.argocd_admin_password_path}") ? 1 : 0
-  metadata {
-    name = "argocd"
-  }
-}
-
-# Apply the argocd admin password sealed secret if it exists
-resource "kubectl_manifest" "argocd_admin_password" {
-  count      = fileexists("${var.argocd_admin_password_path}") ? 1 : 0
-  depends_on = [helm_release.sealed_secrets, data.kubernetes_namespace.argocd_ns]
-
-  yaml_body = data.kubectl_file_documents.argocd_admin_password.documents[0]
-}
