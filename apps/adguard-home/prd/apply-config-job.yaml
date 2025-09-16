@@ -3,6 +3,7 @@ kind: Job
 metadata:
   name: adguard-home-apply-config
 spec:
+  suspend: true
   template:
     spec:
       containers:
