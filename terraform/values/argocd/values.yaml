@@ -46,15 +46,6 @@ server:
 configs:
   params:
     server.insecure: true
-  # Admin password configuration
-  secret:
-    # When using sealed secrets, this will be ignored as the secret will be created by sealed-secrets
-    # But we keep it here for reference
-    argocdServerAdminPassword: ""
-    # Use existing secret for admin password
-    existingSecret: "argocd-admin-password"
-    # Key in the existing secret that contains the password
-    existingSecretKey: "password"
 
 # Application Controller configuration
 applicationController:

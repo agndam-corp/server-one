@@ -81,11 +81,6 @@ EOF
       curl -sfL https://get.k3s.io | sh -s - \
         --write-kubeconfig-mode 644 \
         --secrets-encryption \
-        --kubelet-arg="kube-reserved=cpu=100m,memory=200Mi" \
-        --kubelet-arg="system-reserved=cpu=100m,memory=200Mi" \
-        --snapshotter native \
-        --kubelet-arg="metric-resolution=15s" \
-        --disable servicelb \
         --disable local-storage
       #  --disable metrics-server
 

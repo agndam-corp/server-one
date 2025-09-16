@@ -40,11 +40,11 @@ echo
 echo "Creating Kubernetes secrets..."
 
 # ArgoCD Admin Password Secret
-kubectl create secret generic argocd-admin-password \
-  --from-literal=password="$ARGOCD_PASSWORD" \
+kubectl create secret generic argocd-secret \
+  --from-literal=admin.password="$ARGOCD_PASSWORD" \
   --namespace argocd \
   --dry-run=client \
-  -o yaml > $TEMP_DIR/argocd-admin-password.yaml
+  -o yaml > $TEMP_DIR/argocd-secret.yaml
 
 # Spaceship API Credentials Secret
 kubectl create secret generic spaceship-api-key \
@@ -68,7 +68,7 @@ kubectl create secret docker-registry ghcr-secret \
 echo "Sealing secrets..."
 
 # ArgoCD Admin Password SealedSecret
-kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/argocd-admin-password.yaml > /home/ubuntu/project/sealed-secrets/argocd-admin-password-sealed.yaml
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/argocd-secret.yaml > /home/ubuntu/project/sealed-secrets/argocd-secret-sealed.yaml
 
 # Spaceship API Credentials SealedSecret
 kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/spaceship-api-key.yaml > /home/ubuntu/project/sealed-secrets/spaceship-api-key-sealed.yaml
