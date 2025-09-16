@@ -1,0 +1,21 @@
+{
+  "kind": "SealedSecret",
+  "apiVersion": "bitnami.com/v1alpha1",
+  "metadata": {
+    "name": "adguard-home-git-token",
+    "namespace": "adguard-home",
+    "creationTimestamp": null
+  },
+  "spec": {
+    "template": {
+      "metadata": {
+        "name": "adguard-home-git-token",
+        "namespace": "adguard-home",
+        "creationTimestamp": null
+      }
+    },
+    "encryptedData": {
+      "token": "AgDIt9zDcnp9CVSst5H43GjKyn78vN/sQL391aJDVny3k/ijVdgrLeCaEFSP0Ki3yQMMA04UoqdUKNzVx1+oOAUndZ1/3h00EWKOhsCYnfkgMiiLH0ZOm0xDoCIzQL41e0X1TPN9YmJWr51NwYI4s1Z53iZZOntA9msaBtjS+NE8xsGGQV07qCUWe0HWI0kFDhWld/OTSDc1/xrdL3eofLok/6OC0KB5G5xizIAT3PhE26EZMEf8MeR8ISplyZjA101HuplfNzSqp8c5w+zbrWLFfV6ykfvc0B9iHkWf4OmWKZ0iTeLrhEcZlbXOhkFTpbPlc74FFvxcgavQNfiOevX3dyTxtwwgc+U5ArDxgcS6lPkN0HgThGaoERxM+cEhBlq+oxhGyfmVhX6pvA/NHBDlCwNZ/ec8IF1JF13tiR88nf9dQrvDJvqCASI2jRmFlNJ/2GddAiTto1nrrsA75jYHiDVedRaVi4sFE691ghfznElcwzWrsk4m7sR8TUC3PwD3bxkcG4lwLq9/eSRTQ4+823E/tKI21JXH4jTyxThwY6x4GJApok6guJ2qg5QENOyh8Lj9KM+ctV7/Ims3x1CoSz9TI3v1vVBFXkOnfhBR8Y3YBByUw3+nJxyLgmGA8UudewKIKTwamnZZKec/Ly5oIO+AD8qTBSHr38Lts0vAm1OJt9Wb85wic4p4SIglVK8uUfnEypwGRbzprXq24ov8bB2AQKqqXjQJnTGRk+e5RPq8tTcjg7uZK+HXW/Zr1Z9+Mov6xmY19xVm8WfbcZVauaJcUaeThSlTnhB5e6t9ETBNOHQaRCSADhLQ78E="
+    }
+  }
+}

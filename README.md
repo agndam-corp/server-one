@@ -65,13 +65,13 @@ After applying sealed secrets, ArgoCD automatically deploys all applications thr
 **Phase 2 (ArgoCD Deployed)**:
 - All other sealed secrets from the `sealed-secrets/` directory
 - cert-manager with custom webhook for Spaceship DNS
-- AdGuard Home DNS ad-blocker
+- AdGuard Home DNS ad-blocker with GitOps configuration management
 - And any other applications defined in the `argocd/prd/applications/` directory
 
 ## Directory Structure
 
 - `apps/` - Application manifests (Helm charts and Kustomize)
-  - `adguard-home/` - AdGuard Home DNS ad-blocker
+  - `adguard-home/` - AdGuard Home DNS ad-blocker with GitOps configuration management
   - `cert-manager/` - Certificate management with Let's Encrypt
 - `argocd/` - ArgoCD configuration and applications
   - `prd/applications/` - ArgoCD Application manifests for each deployed service
@@ -90,3 +90,4 @@ After applying sealed secrets, ArgoCD automatically deploys all applications thr
 - Never commit unencrypted secrets to the repository
 - Regularly rotate credentials and update sealed secrets
 - Use role-based access control (RBAC) to limit access to secrets
+- AdGuard Home configuration is managed through GitOps with automated backups to git

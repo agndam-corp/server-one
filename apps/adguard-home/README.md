@@ -11,18 +11,18 @@ AdGuard Home is a network-wide software for blocking ads and tracking. It operat
 - **Deployment**: Runs the AdGuard Home container with emptyDir storage for configuration and data
 - **Service**: Exposes AdGuard Home HTTP and DNS ports within the cluster
 - **Ingress**: Configures Traefik to route external traffic to AdGuard Home
-- **ConfigMap**: Contains the initial AdGuard Home configuration (for reference only)
 - **Certificate**: TLS certificate for secure access via HTTPS
-- **CronJob**: Periodically backs up AdGuard Home configuration via API
-- **Job**: Manually triggered job to apply configuration via API
+- **CronJob**: Periodically backs up AdGuard Home configuration via API to git
+- **Job**: Manually triggered job to apply configuration via API from git
 - **Scripts ConfigMap**: Contains backup and apply scripts
+- **Backup File**: `configmap.backup` - File that stores the current configuration in git
 
 ## Configuration
 
 The application is configured through:
-- Initial configuration in `configmap.yaml` (used for reference only)
 - Web UI for runtime configuration
 - API for programmatic configuration management
+- Git for persistent configuration storage
 
 ## Access
 
@@ -32,23 +32,30 @@ AdGuard Home is accessible at:
 
 ## Configuration Management
 
-Since AdGuard Home modifies its configuration at runtime, we use an API-based approach for configuration management:
+Since AdGuard Home modifies its configuration at runtime, we use a GitOps approach for configuration management:
 
 1. **Initial Setup**: AdGuard Home starts with default configuration
 2. **Runtime Configuration**: Configure through the web UI
-3. **Backup**: The CronJob (`backup-cronjob.yaml`) runs daily to backup the current configuration via API
-4. **Apply Configuration**: The Job (`apply-config-job.yaml`) can be manually triggered to apply configuration via API
+3. **Backup**: The CronJob (`backup-cronjob.yaml`) runs daily to:
+   - Get the current configuration via API
+   - Update `configmap.backup` with the current configuration
+   - Commit and push changes to git
+4. **Apply Configuration**: The Job (`apply-config-job.yaml`) can be manually triggered to:
+   - Get the configuration from `configmap.backup` in git
+   - Apply it via the AdGuard Home API
 
 To manually trigger the configuration apply job:
 ```bash
-kubectl create job --from=cronjob/adguard-home-apply-config adguard-home-apply-config-manual-$(date +%s)
+kubectl create job --from=job/adguard-home-apply-config adguard-home-apply-config-manual-$(date +%s) -n adguard-home
 ```
 
-## Updating Initial Configuration
+## Required Configuration
 
-To update the initial AdGuard Home configuration:
-1. Modify the `configmap.yaml` file (for reference)
-2. Commit and push changes to Git
-3. ArgoCD will automatically sync the changes to the cluster
+Before deploying, you need to update the scripts with your specific configuration:
 
-Note: Changes to the ConfigMap will not automatically apply to running instances. Use the web UI or API for runtime configuration changes.
+1. Update the `GIT_REPO` variable in `scripts-configmap.yaml` with your git repository URL
+2. Update the `GIT_USERNAME` and `GIT_EMAIL` variables in `scripts-configmap.yaml` with your git credentials
+3. Update the `CONFIG_FILE_PATH` variable if you want to store the configuration in a different location
+4. Generate a git token with appropriate permissions and add it using the `generate-sealed-secrets.sh` script
+
+Note: The initial configuration is managed entirely through the web UI or API. The `configmap.yaml` file has been removed as it had no value in the current setup.

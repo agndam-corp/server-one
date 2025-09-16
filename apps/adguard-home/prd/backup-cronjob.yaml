@@ -14,6 +14,12 @@ spec:
             command:
             - /bin/sh
             - /scripts/backup-config.sh
+            env:
+            - name: GIT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: adguard-home-git-token
+                  key: token
             volumeMounts:
             - name: scripts
               mountPath: /scripts

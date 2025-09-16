@@ -36,6 +36,11 @@ echo "Enter GHCR Personal Access Token:"
 read -s GHCR_TOKEN
 echo
 
+# AdGuard Home Git Token
+echo "Enter AdGuard Home Git Token (for configuration backup):"
+read -s ADGUARD_GIT_TOKEN
+echo
+
 # Create Kubernetes secrets in temporary directory
 echo "Creating Kubernetes secrets..."
 
@@ -64,17 +69,27 @@ kubectl create secret docker-registry ghcr-secret \
   --dry-run=client \
   -o yaml > $TEMP_DIR/ghcr-secret.yaml
 
+# AdGuard Home Git Token Secret
+kubectl create secret generic adguard-home-git-token \
+  --from-literal=token="$ADGUARD_GIT_TOKEN" \
+  --namespace adguard-home \
+  --dry-run=client \
+  -o yaml > $TEMP_DIR/adguard-home-git-token.yaml
+
 # Seal the secrets
 echo "Sealing secrets..."
 
 # ArgoCD Admin Password SealedSecret
-kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/argocd-secret.yaml > /home/ubuntu/project/sealed-secrets/argocd-secret-sealed.yaml
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/argocd-secret.yaml > /home/ubuntu/project/sealed-secrets/prd/argocd-secret-sealed.yaml
 
 # Spaceship API Credentials SealedSecret
-kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/spaceship-api-key.yaml > /home/ubuntu/project/sealed-secrets/spaceship-api-key-sealed.yaml
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/spaceship-api-key.yaml > /home/ubuntu/project/sealed-secrets/prd/spaceship-api-key-sealed.yaml
 
 # GHCR Image Pull SealedSecret
-kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/ghcr-secret.yaml > /home/ubuntu/project/sealed-secrets/ghcr-secret-sealed.yaml
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/ghcr-secret.yaml > /home/ubuntu/project/sealed-secrets/prd/ghcr-secret-sealed.yaml
+
+# AdGuard Home Git Token SealedSecret
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/adguard-home-git-token.yaml > /home/ubuntu/project/sealed-secrets/prd/adguard-home-git-token-sealed.yaml
 
 # Clean up temporary files
 rm -rf $TEMP_DIR
