@@ -9,6 +9,9 @@ resources:
 - service.yaml
 - ingress.yaml
 - configmap.yaml
+- scripts-configmap.yaml
+- backup-cronjob.yaml
+- apply-config-job.yaml
 
 generatorOptions:
   disableNameSuffixHash: true

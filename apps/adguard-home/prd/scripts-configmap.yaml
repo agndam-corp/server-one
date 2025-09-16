@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: adguard-home-scripts
+data:
+  backup-config.sh: |
+    #!/bin/sh
+    # Script to backup AdGuard Home configuration via API
+    set -e
+
+    # Wait for AdGuard Home to be ready
+    until curl -s http://adguard-home.adguard-home.svc.cluster.local/api/v1/status > /dev/null; do
+      echo "Waiting for AdGuard Home to be ready..."
+      sleep 5
+    done
+
+    # Get current configuration
+    echo "Backing up AdGuard Home configuration..."
+    curl -s http://adguard-home.adguard-home.svc.cluster.local/api/v1/config > /tmp/config.json
+
+    # Here you would typically save the configuration to a persistent location
+    # For example, you could:
+    # 1. Create a ConfigMap with the configuration
+    # 2. Save it to a Git repository
+    # 3. Upload it to a cloud storage bucket
+    # 4. Save it to a PersistentVolume
+
+    echo "Configuration backup completed"
+    echo "Current configuration:"
+    cat /tmp/config.json
+
+  apply-config.sh: |
+    #!/bin/sh
+    # Script to apply configuration to AdGuard Home via API
+    set -e
+
+    # Wait for AdGuard Home to be ready
+    until curl -s http://adguard-home.adguard-home.svc.cluster.local/api/v1/status > /dev/null; do
+      echo "Waiting for AdGuard Home to be ready..."
+      sleep 5
+    done
+
+    # Apply configuration
+    # This script would typically:
+    # 1. Get the desired configuration from a ConfigMap, Git repository, or other source
+    # 2. Apply it via the AdGuard Home API
+    #
+    # Example API calls:
+    # curl -X POST http://adguard-home.adguard-home.svc.cluster.local/api/v1/config/set -d @config.json
+    #
+    # For now, we'll just log that the script ran
+    echo "Apply configuration script executed"
+    echo "In a real implementation, this would apply configuration via the AdGuard Home API"

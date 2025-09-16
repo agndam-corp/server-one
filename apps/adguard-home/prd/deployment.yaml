@@ -14,21 +14,6 @@ spec:
       labels:
         app: adguard-home
     spec:
-      initContainers:
-      - name: config-init
-        image: adguard/adguardhome:v0.107.66
-        command: ['sh', '-c']
-        args:
-        - |
-          mkdir -p /opt/adguardhome/conf
-          mkdir -p /opt/adguardhome/work
-          cp /config-init/AdGuardHome.yaml /opt/adguardhome/conf/AdGuardHome.yaml
-          chmod 755 /opt/adguardhome/conf/AdGuardHome.yaml
-        volumeMounts:
-        - name: config-volume-init
-          mountPath: /config-init
-        - name: data-volume
-          mountPath: /opt/adguardhome
       containers:
       - name: adguard-home
         image: adguard/adguardhome:v0.107.66
@@ -52,8 +37,5 @@ spec:
             memory: "512Mi"
             cpu: "500m"
       volumes:
-      - name: config-volume-init
-        configMap:
-          name: adguard-home-config
       - name: data-volume
         emptyDir: {}
