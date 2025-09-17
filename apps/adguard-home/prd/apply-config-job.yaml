@@ -29,6 +29,8 @@ spec:
         volumeMounts:
         - name: scripts
           mountPath: /scripts
+      imagePullSecrets:
+      - name: ghcr-secret
       restartPolicy: OnFailure
       volumes:
       - name: scripts
