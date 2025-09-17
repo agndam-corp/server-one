@@ -29,6 +29,7 @@ spec:
         volumeMounts:
         - name: scripts
           mountPath: /scripts
+          readOnly: true
       imagePullSecrets:
       - name: ghcr-secret
       restartPolicy: OnFailure
@@ -36,3 +37,4 @@ spec:
       - name: scripts
         configMap:
           name: adguard-home-scripts
+          defaultMode: 0755
