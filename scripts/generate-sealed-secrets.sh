@@ -72,6 +72,16 @@ kubectl create secret docker-registry ghcr-secret \
   --dry-run=client \
   -o yaml > $TEMP_DIR/ghcr-secret.yaml
 
+# GHCR Image Pull Secret for adguard-home namespace
+kubectl create secret docker-registry ghcr-secret \
+  --docker-server=ghcr.io \
+  --docker-username="$GHCR_USERNAME" \
+  --docker-password="$GHCR_TOKEN" \
+  --docker-email=noreply@github.com \
+  --namespace adguard-home \
+  --dry-run=client \
+  -o yaml > $TEMP_DIR/ghcr-secret-adguard-home.yaml
+
 # AdGuard Home Git Token Secret
 kubectl create secret generic adguard-home-git-token \
   --from-literal=token="$ADGUARD_GIT_TOKEN" \
@@ -89,6 +99,9 @@ kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $
 
 # GHCR Image Pull SealedSecret
 kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/ghcr-secret.yaml > /home/ubuntu/project/sealed-secrets/prd/ghcr-secret-sealed.yaml
+
+# GHCR Image Pull SealedSecret for adguard-home namespace
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/ghcr-secret-adguard-home.yaml > /home/ubuntu/project/sealed-secrets/prd/ghcr-secret-adguard-home-sealed.yaml
 
 # AdGuard Home Git Token SealedSecret
 kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/adguard-home-git-token.yaml > /home/ubuntu/project/sealed-secrets/prd/adguard-home-git-token-sealed.yaml

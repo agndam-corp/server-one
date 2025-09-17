@@ -29,3 +29,4 @@ notes/
 cert-manager-webhook-spaceship.tar
 *.wtf/
 *.wtf
+secrets/
