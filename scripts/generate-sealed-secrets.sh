@@ -41,6 +41,11 @@ echo "Enter AdGuard Home Git Token (for configuration backup):"
 read -s ADGUARD_GIT_TOKEN
 echo
 
+# AdGuard Home Admin Password
+echo "Enter AdGuard Home Admin Password:"
+read -s ADGUARD_ADMIN_PASSWORD
+echo
+
 # AdGuard Home Git Repository
 echo "Enter AdGuard Home Git Repository URL (e.g., https://github.com/username/repo.git):"
 read ADGUARD_GIT_REPO
@@ -97,6 +102,13 @@ kubectl create secret generic adguard-home-git-token \
   --dry-run=client \
   -o yaml > $TEMP_DIR/adguard-home-git-token.yaml
 
+# AdGuard Home Admin Password Secret
+kubectl create secret generic adguard-home-admin-password \
+  --from-literal=password="$ADGUARD_ADMIN_PASSWORD" \
+  --namespace adguard-home \
+  --dry-run=client \
+  -o yaml > $TEMP_DIR/adguard-home-admin-password.yaml
+
 # Seal the secrets
 echo "Sealing secrets..."
 
@@ -111,6 +123,9 @@ kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $
 
 # AdGuard Home Git Token SealedSecret
 kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/adguard-home-git-token.yaml > /home/ubuntu/project/sealed-secrets/prd/adguard-home-git-token-sealed.yaml
+
+# AdGuard Home Admin Password SealedSecret
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/adguard-home-admin-password.yaml > /home/ubuntu/project/sealed-secrets/prd/adguard-home-admin-password-sealed.yaml
 
 # Clean up temporary files
 rm -rf $TEMP_DIR

@@ -19,38 +19,64 @@ data:
       sleep 5
     done
 
-    # Get current configuration
+    # Get current configuration (in JSON format from API)
     echo "Backing up AdGuard Home configuration..."
     curl -s http://adguard-home.adguard-home.svc.cluster.local/control/config > config.json
 
-    # Clone the repository
-    echo "Cloning repository..."
-    git clone $GIT_REPO repo
+    # Remove sensitive information (password hashes) before saving
+    jq 'del(.users[].password)' config.json > config-sanitized.json
+
+    # Create a temporary git repository
+    echo "Creating temporary git repository..."
+    mkdir repo
     cd repo
+    git init
+    git config user.name "$GIT_USERNAME"
+    git config user.email "$GIT_EMAIL"
 
-    # Update the configuration file
-    echo "Updating configuration file..."
-    jq '.' ../config.json > $CONFIG_FILE_PATH
+    # Get the current file from the repository (if it exists)
+    echo "Fetching current configuration file from repository..."
+    mkdir -p "$(dirname "$CONFIG_FILE_PATH")"
+    curl -s -u "$GIT_USERNAME:$GIT_TOKEN" -o "$CONFIG_FILE_PATH.tmp" \
+      "https://raw.githubusercontent.com/${GIT_REPO#https://github.com/}/$GIT_BRANCH/$CONFIG_FILE_PATH" || true
 
-    # Check if there are changes
-    if ! git diff --quiet $CONFIG_FILE_PATH; then
-      echo "Configuration has changed, committing..."
+    # Check if the file exists and is different
+    if [ -f "$CONFIG_FILE_PATH.tmp" ]; then
+      # Format both files for comparison (convert YAML to JSON for comparison)
+      jq --sort-keys '.' config-sanitized.json > config.new.json
+      # For existing file, we'll just compare as-is since we don't know if it's JSON or YAML
+      cp "$CONFIG_FILE_PATH.tmp" config.old.json
       
-      # Configure git
-      git config user.name "$GIT_USERNAME"
-      git config user.email "$GIT_EMAIL"
+      if ! cmp -s config.new.json config.old.json; then
+        echo "Configuration has changed, updating..."
+        # Copy the sanitized configuration (JSON format)
+        cp config-sanitized.json "$CONFIG_FILE_PATH"
+        
+        # Commit and push changes
+        git add "$CONFIG_FILE_PATH"
+        git commit -m "Update AdGuard Home configuration $(date)"
+        
+        # Push changes using the token
+        git push https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_REPO#https://} $GIT_BRANCH
+        
+        echo "Configuration backup completed and pushed to git"
+      else
+        echo "Configuration unchanged, no commit needed"
+      fi
+    else
+      echo "Configuration file does not exist in repository, creating..."
+      # Create directory structure and copy the sanitized configuration
+      mkdir -p "$(dirname "$CONFIG_FILE_PATH")"
+      cp config-sanitized.json "$CONFIG_FILE_PATH"
       
-      # Add and commit changes
-      git add $CONFIG_FILE_PATH
+      # Commit and push changes
+      git add "$CONFIG_FILE_PATH"
       git commit -m "Update AdGuard Home configuration $(date)"
       
       # Push changes using the token
-      git remote set-url origin https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_REPO#https://}
-      git push origin $GIT_BRANCH
+      git push https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_REPO#https://} $GIT_BRANCH
       
       echo "Configuration backup completed and pushed to git"
-    else
-      echo "Configuration unchanged, no commit needed"
     fi
 
     # Clean up
@@ -73,25 +99,27 @@ data:
       sleep 5
     done
 
-    # Clone the repository
-    echo "Cloning repository..."
-    git clone $GIT_REPO repo
-    cd repo
+    # Download the configuration file from the repository
+    echo "Downloading configuration file from repository..."
+    mkdir -p "$(dirname "$CONFIG_FILE_PATH")"
+    curl -s -u "$GIT_USERNAME:$GIT_TOKEN" -o "$CONFIG_FILE_PATH" \
+      "https://raw.githubusercontent.com/${GIT_REPO#https://github.com/}/$GIT_BRANCH/$CONFIG_FILE_PATH"
 
-    # Checkout the specified branch
-    git checkout $GIT_BRANCH
-
-    # Check if configuration file exists
-    if [ ! -f $CONFIG_FILE_PATH ]; then
-      echo "Configuration file not found: $CONFIG_FILE_PATH"
+    # Check if configuration file was downloaded successfully
+    if [ ! -f "$CONFIG_FILE_PATH" ]; then
+      echo "Failed to download configuration file"
       exit 1
     fi
 
-    # Apply configuration via API
+    # Add admin password back to the configuration
+    echo "Adding admin password to configuration..."
+    jq --arg password "$ADMIN_PASSWORD" '.users[0].password = $password' "$CONFIG_FILE_PATH" > config-with-password.json
+
+    # Apply configuration via API (expects JSON)
     echo "Applying AdGuard Home configuration..."
     curl -X POST \
       -H "Content-Type: application/json" \
-      -d @$CONFIG_FILE_PATH \
+      -d @config-with-password.json \
       http://adguard-home.adguard-home.svc.cluster.local/control/config
 
     echo "Configuration applied successfully"

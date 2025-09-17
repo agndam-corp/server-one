@@ -31,6 +31,11 @@ spec:
             secretKeyRef:
               name: adguard-home-git-token
               key: token
+        - name: ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: adguard-home-admin-password
+              key: password
         volumeMounts:
         - name: scripts
           mountPath: /scripts
