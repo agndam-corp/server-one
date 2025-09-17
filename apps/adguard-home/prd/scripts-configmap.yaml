@@ -31,6 +31,15 @@ data:
     # Get current configuration from various API endpoints
     echo "Backing up AdGuard Home configuration..."
 
+    # Get general status/settings
+    echo "Backing up general status/settings..."
+    if curl -s -u "admin:$ADMIN_PASSWORD" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/status > $CONFIG_DIR/general_status.json; then
+      echo "General status/settings backed up successfully"
+    else
+      echo "Failed to backup general status/settings"
+    fi
+
     # Get DNS configuration
     echo "Backing up DNS configuration..."
     if curl -s -u "admin:$ADMIN_PASSWORD" \
@@ -110,6 +119,51 @@ data:
       echo "Access list backed up successfully"
     else
       echo "Failed to backup access list"
+    fi
+
+    # Get parental control status
+    echo "Backing up parental control status..."
+    if curl -s -u "admin:$ADMIN_PASSWORD" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/parental/status > $CONFIG_DIR/parental_status.json; then
+      echo "Parental control status backed up successfully"
+    else
+      echo "Failed to backup parental control status"
+    fi
+
+    # Get safe browsing status
+    echo "Backing up safe browsing status..."
+    if curl -s -u "admin:$ADMIN_PASSWORD" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/safebrowsing/status > $CONFIG_DIR/safebrowsing_status.json; then
+      echo "Safe browsing status backed up successfully"
+    else
+      echo "Failed to backup safe browsing status"
+    fi
+
+    # Get safe search settings
+    echo "Backing up safe search settings..."
+    if curl -s -u "admin:$ADMIN_PASSWORD" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/safesearch/settings > $CONFIG_DIR/safesearch_settings.json; then
+      echo "Safe search settings backed up successfully"
+    else
+      echo "Failed to backup safe search settings"
+    fi
+
+    # Get TLS configuration
+    echo "Backing up TLS configuration..."
+    if curl -s -u "admin:$ADMIN_PASSWORD" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/tls/status > $CONFIG_DIR/tls_status.json; then
+      echo "TLS configuration backed up successfully"
+    else
+      echo "Failed to backup TLS configuration"
+    fi
+
+    # Get profile information
+    echo "Backing up profile information..."
+    if curl -s -u "admin:$ADMIN_PASSWORD" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/profile > $CONFIG_DIR/profile.json; then
+      echo "Profile information backed up successfully"
+    else
+      echo "Failed to backup profile information"
     fi
 
     # Debug: Show what we have in the config directory
@@ -224,6 +278,14 @@ data:
     # Apply configuration via API
     echo "Applying AdGuard Home configuration..."
 
+    # Apply general status/settings
+    if [ -f "$CONFIG_FILE_PATH/general_status.json" ]; then
+      echo "Applying general status/settings..."
+      # Note: The general status contains mostly runtime information, not configuration
+      # We might not want to apply this directly
+      echo "Skipping general status/settings - contains runtime information"
+    fi
+
     # Apply DNS configuration
     if [ -f "$CONFIG_FILE_PATH/dns_config.json" ]; then
       echo "Applying DNS configuration..."
@@ -272,6 +334,80 @@ data:
         -H "Content-Type: application/json" \
         -d @"$CONFIG_FILE_PATH/dhcp_config.json" \
         http://adguard-home.adguard-home.svc.cluster.local/control/dhcp/set_config
+    fi
+
+    # Apply parental control status
+    if [ -f "$CONFIG_FILE_PATH/parental_status.json" ]; then
+      echo "Applying parental control status..."
+      if grep -q '"enabled":true' "$CONFIG_FILE_PATH/parental_status.json"; then
+        curl -X POST \
+          -u "admin:$ADMIN_PASSWORD" \
+          http://adguard-home.adguard-home.svc.cluster.local/control/parental/enable
+      else
+        curl -X POST \
+          -u "admin:$ADMIN_PASSWORD" \
+          http://adguard-home.adguard-home.svc.cluster.local/control/parental/disable
+      fi
+    fi
+
+    # Apply safe browsing status
+    if [ -f "$CONFIG_FILE_PATH/safebrowsing_status.json" ]; then
+      echo "Applying safe browsing status..."
+      if grep -q '"enabled":true' "$CONFIG_FILE_PATH/safebrowsing_status.json"; then
+        curl -X POST \
+          -u "admin:$ADMIN_PASSWORD" \
+          http://adguard-home.adguard-home.svc.cluster.local/control/safebrowsing/enable
+      else
+        curl -X POST \
+          -u "admin:$ADMIN_PASSWORD" \
+          http://adguard-home.adguard-home.svc.cluster.local/control/safebrowsing/disable
+      fi
+    fi
+
+    # Apply safe search settings
+    if [ -f "$CONFIG_FILE_PATH/safesearch_settings.json" ]; then
+      echo "Applying safe search settings..."
+      curl -X PUT \
+        -u "admin:$ADMIN_PASSWORD" \
+        -H "Content-Type: application/json" \
+        -d @"$CONFIG_FILE_PATH/safesearch_settings.json" \
+        http://adguard-home.adguard-home.svc.cluster.local/control/safesearch/settings
+    fi
+
+    # Apply blocked services
+    if [ -f "$CONFIG_FILE_PATH/blocked_services.json" ]; then
+      echo "Applying blocked services..."
+      curl -X POST \
+        -u "admin:$ADMIN_PASSWORD" \
+        -H "Content-Type: application/json" \
+        -d @"$CONFIG_FILE_PATH/blocked_services.json" \
+        http://adguard-home.adguard-home.svc.cluster.local/control/blocked_services/update
+    fi
+
+    # Apply access list
+    if [ -f "$CONFIG_FILE_PATH/access_list.json" ]; then
+      echo "Applying access list..."
+      curl -X POST \
+        -u "admin:$ADMIN_PASSWORD" \
+        -H "Content-Type: application/json" \
+        -d @"$CONFIG_FILE_PATH/access_list.json" \
+        http://adguard-home.adguard-home.svc.cluster.local/control/access/set
+    fi
+
+    # Apply rewrite rules
+    if [ -f "$CONFIG_FILE_PATH/rewrite_list.json" ]; then
+      echo "Applying rewrite rules..."
+      # Note: This would need to be handled differently since it's a list of rules
+      # We would need to iterate through the rules and apply them individually
+      echo "Skipping rewrite rules for now - would need individual rule handling"
+    fi
+
+    # Apply clients
+    if [ -f "$CONFIG_FILE_PATH/clients.json" ]; then
+      echo "Applying clients configuration..."
+      # Note: This would need special handling since it's a list of clients
+      # We would need to iterate through the clients and apply them individually
+      echo "Skipping clients for now - would need individual client handling"
     fi
 
     echo "Configuration applied successfully"

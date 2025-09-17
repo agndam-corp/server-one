@@ -1,50 +1,53 @@
 apiVersion: batch/v1
-kind: Job
+kind: CronJob
 metadata:
   name: adguard-home-apply-config
 spec:
+  schedule: "0 0 1 1 *"  # Run once a year (dummy schedule, we'll trigger manually)
   suspend: true
-  template:
+  jobTemplate:
     spec:
-      containers:
-      - name: apply-config
-        image: ghcr.io/damianjaskolski95/adguard-home-backup:latest
-        command:
-        - /scripts/apply-config.sh
-        env:
-        - name: GIT_REPO
-          valueFrom:
-            secretKeyRef:
-              name: adguard-home-git-token
-              key: repo
-        - name: GIT_BRANCH
-          value: "master"
-        - name: CONFIG_FILE_PATH
-          value: "apps/adguard-home/prd/config/"
-        - name: GIT_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: adguard-home-git-token
-              key: username
-        - name: GIT_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: adguard-home-git-token
-              key: token
-        - name: ADMIN_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: adguard-home-admin-password
-              key: password
-        volumeMounts:
-        - name: scripts
-          mountPath: /scripts
-          readOnly: true
-      imagePullSecrets:
-      - name: ghcr-secret
-      restartPolicy: OnFailure
-      volumes:
-      - name: scripts
-        configMap:
-          name: adguard-home-scripts
-          defaultMode: 0755
+      template:
+        spec:
+          containers:
+          - name: apply-config
+            image: ghcr.io/damianjaskolski95/adguard-home-backup:latest
+            command:
+            - /scripts/apply-config.sh
+            env:
+            - name: GIT_REPO
+              valueFrom:
+                secretKeyRef:
+                  name: adguard-home-git-token
+                  key: repo
+            - name: GIT_BRANCH
+              value: "master"
+            - name: CONFIG_FILE_PATH
+              value: "apps/adguard-home/prd/config/"
+            - name: GIT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: adguard-home-git-token
+                  key: username
+            - name: GIT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: adguard-home-git-token
+                  key: token
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: adguard-home-admin-password
+                  key: password
+            volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+              readOnly: true
+          imagePullSecrets:
+          - name: ghcr-secret
+          restartPolicy: OnFailure
+          volumes:
+          - name: scripts
+            configMap:
+              name: adguard-home-scripts
+              defaultMode: 0755
