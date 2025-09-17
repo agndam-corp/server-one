@@ -20,7 +20,7 @@ spec:
                   name: adguard-home-git-token
                   key: repo
             - name: GIT_BRANCH
-              value: "main"
+              value: "master"
             - name: CONFIG_FILE_PATH
               value: "apps/adguard-home/prd/config/"
             - name: GIT_USERNAME

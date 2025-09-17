@@ -146,14 +146,28 @@ data:
     find "$CONFIG_FILE_PATH" -type f -exec ls -la {} \;
     git status
 
-    # Check if there are changes
+    # Check if there are changes (both tracked and untracked files)
     echo "Checking for changes..."
+    CHANGES_FOUND=false
+    
+    # Check for untracked files
+    if [ -n "$(git ls-files --others --exclude-standard "$CONFIG_FILE_PATH")" ]; then
+      echo "Found untracked files"
+      CHANGES_FOUND=true
+    fi
+    
+    # Check for modified tracked files
     if ! git diff --quiet "$CONFIG_FILE_PATH"; then
+      echo "Found modified tracked files"
+      CHANGES_FOUND=true
+    fi
+    
+    if [ "$CHANGES_FOUND" = true ]; then
       echo "Configuration has changed, committing..."
       
       # Show what changes we have
       echo "Changes to be committed:"
-      git diff "$CONFIG_FILE_PATH"
+      git status "$CONFIG_FILE_PATH"
       
       # Add and commit changes
       git add "$CONFIG_FILE_PATH"
