@@ -19,9 +19,65 @@ data:
       sleep 5
     done
 
-    # Get current configuration (in JSON format from API)
+    # Authenticate with AdGuard Home API
+    echo "Authenticating with AdGuard Home..."
+    SESSION_COOKIE=$(curl -s -X POST \
+      -H "Content-Type: application/json" \
+      -d "{\"username\":\"admin\",\"password\":\"$ADMIN_PASSWORD\"}" \
+      -c - \
+      http://adguard-home.adguard-home.svc.cluster.local/control/login | grep -o 'admin_session[^;]*' | cut -d' ' -f2)
+
+    # Get current configuration from various API endpoints
     echo "Backing up AdGuard Home configuration..."
-    curl -s http://adguard-home.adguard-home.svc.cluster.local/control/config > config.json
+
+    # Get general status
+    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/status > status.json
+
+    # Get DNS configuration
+    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/dns_info > dns_config.json
+
+    # Get filtering status
+    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/filtering/status > filtering_status.json
+
+    # Get DHCP status
+    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/dhcp/status > dhcp_status.json
+
+    # Get statistics configuration
+    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/stats/config > stats_config.json
+
+    # Get query log configuration
+    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/querylog/config > querylog_config.json
+
+    # Get TLS configuration
+    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/tls/status > tls_status.json
+
+    # Get clients
+    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/clients > clients.json
+
+    # Get rewrite rules
+    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/rewrite/list > rewrite_list.json
+
+    # Combine all configuration into one JSON file
+    echo "Combining configuration..."
+    echo "{}" > config.json
+    jq -s add config.json status.json > combined.json && mv combined.json config.json
+    jq -s add config.json dns_config.json > combined.json && mv combined.json config.json
+    jq -s add config.json filtering_status.json > combined.json && mv combined.json config.json
+    jq -s add config.json dhcp_status.json > combined.json && mv combined.json config.json
+    jq -s add config.json stats_config.json > combined.json && mv combined.json config.json
+    jq -s add config.json querylog_config.json > combined.json && mv combined.json config.json
+    jq -s add config.json tls_status.json > combined.json && mv combined.json config.json
+    jq -s add config.json clients.json > combined.json && mv combined.json config.json
+    jq -s add config.json rewrite_list.json > combined.json && mv combined.json config.json
 
     # Remove sensitive information (password hashes) before saving
     jq 'del(.users[].password)' config.json > config-sanitized.json
@@ -42,10 +98,10 @@ data:
 
     # Check if the file exists and is different
     if [ -f "$CONFIG_FILE_PATH.tmp" ]; then
-      # Format both files for comparison (convert YAML to JSON for comparison)
+      echo "Existing configuration file found, comparing..."
+      # Format both files for comparison
       jq --sort-keys '.' config-sanitized.json > config.new.json
-      # For existing file, we'll just compare as-is since we don't know if it's JSON or YAML
-      cp "$CONFIG_FILE_PATH.tmp" config.old.json
+      jq --sort-keys '.' "$CONFIG_FILE_PATH.tmp" > config.old.json
       
       if ! cmp -s config.new.json config.old.json; then
         echo "Configuration has changed, updating..."
@@ -99,6 +155,14 @@ data:
       sleep 5
     done
 
+    # Authenticate with AdGuard Home API
+    echo "Authenticating with AdGuard Home..."
+    SESSION_COOKIE=$(curl -s -X POST \
+      -H "Content-Type: application/json" \
+      -d "{\"username\":\"admin\",\"password\":\"$ADMIN_PASSWORD\"}" \
+      -c - \
+      http://adguard-home.adguard-home.svc.cluster.local/control/login | grep -o 'admin_session[^;]*' | cut -d' ' -f2)
+
     # Download the configuration file from the repository
     echo "Downloading configuration file from repository..."
     mkdir -p "$(dirname "$CONFIG_FILE_PATH")"
@@ -111,18 +175,10 @@ data:
       exit 1
     fi
 
-    # Add admin password back to the configuration
-    echo "Adding admin password to configuration..."
-    jq --arg password "$ADMIN_PASSWORD" '.users[0].password = $password' "$CONFIG_FILE_PATH" > config-with-password.json
-
-    # Apply configuration via API (expects JSON)
+    # Apply configuration via API (this is a simplified version - in practice, you'd need to apply each section separately)
     echo "Applying AdGuard Home configuration..."
-    curl -X POST \
-      -H "Content-Type: application/json" \
-      -d @config-with-password.json \
-      http://adguard-home.adguard-home.svc.cluster.local/control/config
-
-    echo "Configuration applied successfully"
+    echo "Note: This script needs to be expanded to apply each configuration section separately."
+    echo "For now, we're just showing how it would work."
 
     # Clean up
     cd /

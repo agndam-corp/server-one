@@ -41,9 +41,14 @@ echo "Enter AdGuard Home Git Token (for configuration backup):"
 read -s ADGUARD_GIT_TOKEN
 echo
 
-# AdGuard Home Admin Password
-echo "Enter AdGuard Home Admin Password:"
+# AdGuard Home Admin Password (for API authentication)
+echo "Enter AdGuard Home Admin Password (plain text for API authentication):"
 read -s ADGUARD_ADMIN_PASSWORD
+echo
+
+# AdGuard Home Admin Password (bcrypt hash for config file - leave empty if you want to use the plain text password)
+echo "Enter AdGuard Home Admin Password (bcrypt hash for config file - optional, leave empty to use plain text password):"
+read -s ADGUARD_ADMIN_PASSWORD_HASH
 echo
 
 # AdGuard Home Git Repository
@@ -102,12 +107,21 @@ kubectl create secret generic adguard-home-git-token \
   --dry-run=client \
   -o yaml > $TEMP_DIR/adguard-home-git-token.yaml
 
-# AdGuard Home Admin Password Secret
+# AdGuard Home Admin Password Secret (for API authentication)
 kubectl create secret generic adguard-home-admin-password \
   --from-literal=password="$ADGUARD_ADMIN_PASSWORD" \
   --namespace adguard-home \
   --dry-run=client \
   -o yaml > $TEMP_DIR/adguard-home-admin-password.yaml
+
+# AdGuard Home Admin Password Hash Secret (for config file - optional)
+if [ -n "$ADGUARD_ADMIN_PASSWORD_HASH" ]; then
+  kubectl create secret generic adguard-home-admin-password-hash \
+    --from-literal=password_hash="$ADGUARD_ADMIN_PASSWORD_HASH" \
+    --namespace adguard-home \
+    --dry-run=client \
+    -o yaml > $TEMP_DIR/adguard-home-admin-password-hash.yaml
+fi
 
 # Seal the secrets
 echo "Sealing secrets..."
@@ -124,8 +138,13 @@ kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $
 # AdGuard Home Git Token SealedSecret
 kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/adguard-home-git-token.yaml > /home/ubuntu/project/sealed-secrets/prd/adguard-home-git-token-sealed.yaml
 
-# AdGuard Home Admin Password SealedSecret
+# AdGuard Home Admin Password SealedSecret (for API authentication)
 kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/adguard-home-admin-password.yaml > /home/ubuntu/project/sealed-secrets/prd/adguard-home-admin-password-sealed.yaml
+
+# AdGuard Home Admin Password Hash SealedSecret (for config file - optional)
+if [ -f $TEMP_DIR/adguard-home-admin-password-hash.yaml ]; then
+  kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/adguard-home-admin-password-hash.yaml > /home/ubuntu/project/sealed-secrets/prd/adguard-home-admin-password-hash-sealed.yaml
+fi
 
 # Clean up temporary files
 rm -rf $TEMP_DIR
