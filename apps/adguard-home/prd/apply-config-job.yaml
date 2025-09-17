@@ -20,7 +20,7 @@ spec:
         - name: GIT_BRANCH
           value: "main"
         - name: CONFIG_FILE_PATH
-          value: "apps/adguard-home/prd/configmap.backup"
+          value: "apps/adguard-home/prd/config/"
         - name: GIT_USERNAME
           valueFrom:
             secretKeyRef:
