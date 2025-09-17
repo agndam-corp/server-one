@@ -8,13 +8,6 @@ data:
     # Script to backup AdGuard Home configuration via API and push to git
     set -e
 
-    # Configuration
-    GIT_REPO="https://github.com/your-username/your-repo.git"
-    GIT_BRANCH="main"
-    CONFIG_FILE_PATH="apps/adguard-home/prd/configmap.backup"
-    GIT_USERNAME="your-git-username"
-    GIT_EMAIL="your-git-email@example.com"
-
     # Create temporary directory
     TEMP_DIR="/tmp/adguard-backup-$(date +%s)"
     mkdir -p $TEMP_DIR
@@ -52,7 +45,7 @@ data:
       git commit -m "Update AdGuard Home configuration $(date)"
       
       # Push changes using the token
-      git remote set-url origin https://$GIT_USERNAME:$GIT_TOKEN@${GIT_REPO#https://}
+      git remote set-url origin https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_REPO#https://}
       git push origin $GIT_BRANCH
       
       echo "Configuration backup completed and pushed to git"
@@ -68,11 +61,6 @@ data:
     #!/bin/sh
     # Script to apply configuration to AdGuard Home via API from git
     set -e
-
-    # Configuration
-    GIT_REPO="https://github.com/your-username/your-repo.git"
-    GIT_BRANCH="main"
-    CONFIG_FILE_PATH="apps/adguard-home/prd/configmap.backup"
 
     # Create temporary directory
     TEMP_DIR="/tmp/adguard-apply-$(date +%s)"

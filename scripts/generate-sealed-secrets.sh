@@ -41,6 +41,16 @@ echo "Enter AdGuard Home Git Token (for configuration backup):"
 read -s ADGUARD_GIT_TOKEN
 echo
 
+# AdGuard Home Git Repository
+echo "Enter AdGuard Home Git Repository URL (e.g., https://github.com/username/repo.git):"
+read ADGUARD_GIT_REPO
+echo
+
+# AdGuard Home Git User Email
+echo "Enter AdGuard Home Git User Email (for commits):"
+read ADGUARD_GIT_EMAIL
+echo
+
 # Create Kubernetes secrets in temporary directory
 echo "Creating Kubernetes secrets..."
 
@@ -65,6 +75,8 @@ kubectl create secret docker-registry ghcr-secret \
 # AdGuard Home Git Token Secret
 kubectl create secret generic adguard-home-git-token \
   --from-literal=token="$ADGUARD_GIT_TOKEN" \
+  --from-literal=repo="$ADGUARD_GIT_REPO" \
+  --from-literal=email="$ADGUARD_GIT_EMAIL" \
   --namespace adguard-home \
   --dry-run=client \
   -o yaml > $TEMP_DIR/adguard-home-git-token.yaml

@@ -15,6 +15,22 @@ spec:
             - /bin/sh
             - /scripts/backup-config.sh
             env:
+            - name: GIT_REPO
+              valueFrom:
+                secretKeyRef:
+                  name: adguard-home-git-token
+                  key: repo
+            - name: GIT_BRANCH
+              value: "main"
+            - name: CONFIG_FILE_PATH
+              value: "apps/adguard-home/prd/configmap.backup"
+            - name: GIT_USERNAME
+              value: "your-git-username"  # Update with your Git username
+            - name: GIT_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: adguard-home-git-token
+                  key: email
             - name: GIT_TOKEN
               valueFrom:
                 secretKeyRef:
