@@ -16,110 +16,156 @@ data:
     mkdir -p $TEMP_DIR
     cd $TEMP_DIR
 
+    echo "Created temporary directory: $TEMP_DIR"
+
     # Wait for AdGuard Home to be ready
-    until curl -s http://adguard-home.adguard-home.svc.cluster.local/control/status > /dev/null; do
+    until curl -s -u "admin:$ADMIN_PASSWORD" http://adguard-home.adguard-home.svc.cluster.local/control/status > /dev/null; do
       echo "Waiting for AdGuard Home to be ready..."
       sleep 5
     done
 
-    # Authenticate with AdGuard Home API
-    echo "Authenticating with AdGuard Home..."
-    SESSION_COOKIE=$(curl -s -X POST \
-      -H "Content-Type: application/json" \
-      -d "{\"username\":\"admin\",\"password\":\"$ADMIN_PASSWORD\"}" \
-      -c - \
-      http://adguard-home.adguard-home.svc.cluster.local/control/login | grep -o 'admin_session[^;]*' | cut -d' ' -f2)
-
     # Create config directory
     mkdir -p $CONFIG_DIR
+    echo "Created config directory: $CONFIG_DIR"
 
     # Get current configuration from various API endpoints
     echo "Backing up AdGuard Home configuration..."
 
-    # Get general status
-    echo "Backing up status..."
-    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
-      http://adguard-home.adguard-home.svc.cluster.local/control/status > $CONFIG_DIR/status.json
-
     # Get DNS configuration
     echo "Backing up DNS configuration..."
-    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
-      http://adguard-home.adguard-home.svc.cluster.local/control/dns_info > $CONFIG_DIR/dns_config.json
+    if curl -s -u "admin:$ADMIN_PASSWORD" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/dns_info > $CONFIG_DIR/dns_config.json; then
+      echo "DNS configuration backed up successfully"
+    else
+      echo "Failed to backup DNS configuration"
+    fi
 
     # Get filtering status
     echo "Backing up filtering status..."
-    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
-      http://adguard-home.adguard-home.svc.cluster.local/control/filtering/status > $CONFIG_DIR/filtering_status.json
+    if curl -s -u "admin:$ADMIN_PASSWORD" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/filtering/status > $CONFIG_DIR/filtering_status.json; then
+      echo "Filtering status backed up successfully"
+    else
+      echo "Failed to backup filtering status"
+    fi
 
-    # Get DHCP status
-    echo "Backing up DHCP status..."
-    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
-      http://adguard-home.adguard-home.svc.cluster.local/control/dhcp/status > $CONFIG_DIR/dhcp_status.json
+    # Get DHCP configuration
+    echo "Backing up DHCP configuration..."
+    if curl -s -u "admin:$ADMIN_PASSWORD" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/dhcp/status > $CONFIG_DIR/dhcp_config.json; then
+      echo "DHCP configuration backed up successfully"
+    else
+      echo "Failed to backup DHCP configuration"
+    fi
 
     # Get statistics configuration
     echo "Backing up statistics configuration..."
-    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
-      http://adguard-home.adguard-home.svc.cluster.local/control/stats/config > $CONFIG_DIR/stats_config.json
+    if curl -s -u "admin:$ADMIN_PASSWORD" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/stats/config > $CONFIG_DIR/stats_config.json; then
+      echo "Statistics configuration backed up successfully"
+    else
+      echo "Failed to backup statistics configuration"
+    fi
 
     # Get query log configuration
     echo "Backing up query log configuration..."
-    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
-      http://adguard-home.adguard-home.svc.cluster.local/control/querylog/config > $CONFIG_DIR/querylog_config.json
-
-    # Get TLS configuration
-    echo "Backing up TLS configuration..."
-    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
-      http://adguard-home.adguard-home.svc.cluster.local/control/tls/status > $CONFIG_DIR/tls_status.json
+    if curl -s -u "admin:$ADMIN_PASSWORD" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/querylog/config > $CONFIG_DIR/querylog_config.json; then
+      echo "Query log configuration backed up successfully"
+    else
+      echo "Failed to backup query log configuration"
+    fi
 
     # Get clients
     echo "Backing up clients..."
-    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
-      http://adguard-home.adguard-home.svc.cluster.local/control/clients > $CONFIG_DIR/clients.json
+    if curl -s -u "admin:$ADMIN_PASSWORD" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/clients > $CONFIG_DIR/clients.json; then
+      echo "Clients backed up successfully"
+    else
+      echo "Failed to backup clients"
+    fi
 
     # Get rewrite rules
     echo "Backing up rewrite rules..."
-    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
-      http://adguard-home.adguard-home.svc.cluster.local/control/rewrite/list > $CONFIG_DIR/rewrite_list.json
+    if curl -s -u "admin:$ADMIN_PASSWORD" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/rewrite/list > $CONFIG_DIR/rewrite_list.json; then
+      echo "Rewrite rules backed up successfully"
+    else
+      echo "Failed to backup rewrite rules"
+    fi
 
     # Get blocked services
     echo "Backing up blocked services..."
-    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
-      http://adguard-home.adguard-home.svc.cluster.local/control/blocked_services/get > $CONFIG_DIR/blocked_services.json
+    if curl -s -u "admin:$ADMIN_PASSWORD" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/blocked_services/get > $CONFIG_DIR/blocked_services.json; then
+      echo "Blocked services backed up successfully"
+    else
+      echo "Failed to backup blocked services"
+    fi
 
     # Get access list
     echo "Backing up access list..."
-    curl -s -H "Cookie: admin_session=$SESSION_COOKIE" \
-      http://adguard-home.adguard-home.svc.cluster.local/control/access/list > $CONFIG_DIR/access_list.json
+    if curl -s -u "admin:$ADMIN_PASSWORD" \
+      http://adguard-home.adguard-home.svc.cluster.local/control/access/list > $CONFIG_DIR/access_list.json; then
+      echo "Access list backed up successfully"
+    else
+      echo "Failed to backup access list"
+    fi
+
+    # Debug: Show what we have in the config directory
+    echo "Contents of config directory:"
+    ls -la $CONFIG_DIR/
 
     # Create a temporary git repository
     echo "Creating temporary git repository..."
     mkdir repo
     cd repo
-    git init
-    git config user.name "$GIT_USERNAME"
-    git config user.email "$GIT_EMAIL"
 
     # Clone the repository
     echo "Cloning repository..."
-    git clone https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_REPO#https://} .
+    if git clone https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_REPO#https://} .; then
+      echo "Repository cloned successfully"
+      git config user.name "$GIT_USERNAME"
+      git config user.email "$GIT_EMAIL"
+    else
+      echo "Failed to clone repository"
+      exit 1
+    fi
+
+    # Debug: Show repository structure
+    echo "Repository structure before copying:"
+    find . -type d -name ".git" -prune -o -print
 
     # Copy configuration files
     echo "Copying configuration files..."
     mkdir -p "$CONFIG_FILE_PATH"
     cp -r ../$CONFIG_DIR/* "$CONFIG_FILE_PATH/"
 
+    # Debug: Show what we have copied
+    echo "Copied configuration files:"
+    find "$CONFIG_FILE_PATH" -type f -exec ls -la {} \;
+    git status
+
     # Check if there are changes
+    echo "Checking for changes..."
     if ! git diff --quiet "$CONFIG_FILE_PATH"; then
       echo "Configuration has changed, committing..."
+      
+      # Show what changes we have
+      echo "Changes to be committed:"
+      git diff "$CONFIG_FILE_PATH"
       
       # Add and commit changes
       git add "$CONFIG_FILE_PATH"
       git commit -m "Update AdGuard Home configuration $(date)"
       
       # Push changes
-      git push origin $GIT_BRANCH
-      
-      echo "Configuration backup completed and pushed to git"
+      echo "Pushing changes to repository..."
+      if git push origin $GIT_BRANCH; then
+        echo "Configuration backup completed and pushed to git"
+      else
+        echo "Failed to push changes to repository"
+      fi
     else
       echo "Configuration unchanged, no commit needed"
     fi
@@ -142,18 +188,10 @@ data:
     cd $TEMP_DIR
 
     # Wait for AdGuard Home to be ready
-    until curl -s http://adguard-home.adguard-home.svc.cluster.local/control/status > /dev/null; do
+    until curl -s -u "admin:$ADMIN_PASSWORD" http://adguard-home.adguard-home.svc.cluster.local/control/status > /dev/null; do
       echo "Waiting for AdGuard Home to be ready..."
       sleep 5
     done
-
-    # Authenticate with AdGuard Home API
-    echo "Authenticating with AdGuard Home..."
-    SESSION_COOKIE=$(curl -s -X POST \
-      -H "Content-Type: application/json" \
-      -d "{\"username\":\"admin\",\"password\":\"$ADMIN_PASSWORD\"}" \
-      -c - \
-      http://adguard-home.adguard-home.svc.cluster.local/control/login | grep -o 'admin_session[^;]*' | cut -d' ' -f2)
 
     # Clone the repository
     echo "Cloning repository..."
@@ -176,7 +214,7 @@ data:
     if [ -f "$CONFIG_FILE_PATH/dns_config.json" ]; then
       echo "Applying DNS configuration..."
       curl -X POST \
-        -H "Cookie: admin_session=$SESSION_COOKIE" \
+        -u "admin:$ADMIN_PASSWORD" \
         -H "Content-Type: application/json" \
         -d @"$CONFIG_FILE_PATH/dns_config.json" \
         http://adguard-home.adguard-home.svc.cluster.local/control/dns_config
@@ -186,7 +224,7 @@ data:
     if [ -f "$CONFIG_FILE_PATH/filtering_status.json" ]; then
       echo "Applying filtering configuration..."
       curl -X POST \
-        -H "Cookie: admin_session=$SESSION_COOKIE" \
+        -u "admin:$ADMIN_PASSWORD" \
         -H "Content-Type: application/json" \
         -d @"$CONFIG_FILE_PATH/filtering_status.json" \
         http://adguard-home.adguard-home.svc.cluster.local/control/filtering/config
@@ -196,7 +234,7 @@ data:
     if [ -f "$CONFIG_FILE_PATH/stats_config.json" ]; then
       echo "Applying statistics configuration..."
       curl -X PUT \
-        -H "Cookie: admin_session=$SESSION_COOKIE" \
+        -u "admin:$ADMIN_PASSWORD" \
         -H "Content-Type: application/json" \
         -d @"$CONFIG_FILE_PATH/stats_config.json" \
         http://adguard-home.adguard-home.svc.cluster.local/control/stats/config/update
@@ -206,10 +244,20 @@ data:
     if [ -f "$CONFIG_FILE_PATH/querylog_config.json" ]; then
       echo "Applying query log configuration..."
       curl -X PUT \
-        -H "Cookie: admin_session=$SESSION_COOKIE" \
+        -u "admin:$ADMIN_PASSWORD" \
         -H "Content-Type: application/json" \
         -d @"$CONFIG_FILE_PATH/querylog_config.json" \
         http://adguard-home.adguard-home.svc.cluster.local/control/querylog/config/update
+    fi
+
+    # Apply DHCP configuration
+    if [ -f "$CONFIG_FILE_PATH/dhcp_config.json" ]; then
+      echo "Applying DHCP configuration..."
+      curl -X POST \
+        -u "admin:$ADMIN_PASSWORD" \
+        -H "Content-Type: application/json" \
+        -d @"$CONFIG_FILE_PATH/dhcp_config.json" \
+        http://adguard-home.adguard-home.svc.cluster.local/control/dhcp/set_config
     fi
 
     echo "Configuration applied successfully"
