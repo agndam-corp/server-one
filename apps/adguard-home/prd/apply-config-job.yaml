@@ -21,6 +21,11 @@ spec:
           value: "main"
         - name: CONFIG_FILE_PATH
           value: "apps/adguard-home/prd/configmap.backup"
+        - name: GIT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: adguard-home-git-token
+              key: username
         - name: GIT_TOKEN
           valueFrom:
             secretKeyRef:
