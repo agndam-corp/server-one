@@ -8,9 +8,8 @@ spec:
     spec:
       containers:
       - name: apply-config
-        image: curlimages/curl
+        image: ghcr.io/damianjaskolski95/adguard-home-backup:latest
         command:
-        - /bin/sh
         - /scripts/apply-config.sh
         env:
         - name: GIT_REPO

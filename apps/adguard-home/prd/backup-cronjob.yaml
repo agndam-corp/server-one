@@ -10,9 +10,8 @@ spec:
         spec:
           containers:
           - name: backup
-            image: curlimages/curl
+            image: ghcr.io/damianjaskolski95/adguard-home-backup:latest
             command:
-            - /bin/sh
             - /scripts/backup-config.sh
             env:
             - name: GIT_REPO

@@ -1,3 +1,4 @@
+#ghcr.io/damianjaskolski95/"cert-manager-webhook-spaceship:latest
 FROM golang:1.22-alpine AS builder
 
 RUN apk add --no-cache git
