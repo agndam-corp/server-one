@@ -50,7 +50,7 @@ spec:
           name: https
         - containerPort: 853
           name: dot
-        - containerPort: 784
+        - containerPort: 853
           name: doq
         env:
         - name: DISABLE_INIT

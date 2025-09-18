@@ -28,12 +28,13 @@ cat > tls_config.json <<EOF
   "force_https": true,
   "port_https": 443,
   "port_dns_over_tls": 853,
-  "port_dns_over_quic": 784,
+  "port_dns_over_quic": 853,
   "port_dnscrypt": 0,
   "dnscrypt_config_file": "",
   "allow_unencrypted_doh": false,
   "strict_sni_check": false,
-  "disable_plaintext": true
+  "disable_plaintext": true,
+  "serve_plain_dns": true
 }
 EOF
 

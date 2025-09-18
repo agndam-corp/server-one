@@ -3,7 +3,9 @@ kind: Ingress
 metadata:
   name: adguard-home
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls.passthrough: "true"
 spec:
   ingressClassName: traefik
   rules:
@@ -16,4 +18,4 @@ spec:
           service:
             name: adguard-home
             port:
-              number: 80
+              number: 443

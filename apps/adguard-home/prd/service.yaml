@@ -31,7 +31,7 @@ spec:
       targetPort: 853
       protocol: TCP
     - name: doq
-      port: 784
-      targetPort: 784
+      port: 853
+      targetPort: 853
       protocol: UDP
   type: ClusterIP
