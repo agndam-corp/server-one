@@ -19,9 +19,9 @@ spec:
         runAsUser: 1000
         runAsGroup: 3000
       initContainers:
-      - name: set-permissions
+      - name: init-directories
         image: busybox:latest
-        command: ['sh', '-c', 'chown -R 1000:3000 /opt/adguardhome/work && chown -R 1000:3000 /opt/adguardhome/conf']
+        command: ['sh', '-c', 'mkdir -p /opt/adguardhome/conf /opt/adguardhome/work && touch /opt/adguardhome/conf/AdGuardHome.yaml && chown -R 1000:3000 /opt/adguardhome']
         volumeMounts:
         - name: adguard-work
           mountPath: /opt/adguardhome/work
@@ -45,6 +45,9 @@ spec:
           name: dot
         - containerPort: 784
           name: doq
+        env:
+        - name: DISABLE_INIT
+          value: "true"
         resources:
           requests:
             memory: "256Mi"
