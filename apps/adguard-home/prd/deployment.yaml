@@ -21,7 +21,7 @@ spec:
       initContainers:
       - name: set-permissions
         image: busybox:latest
-        command: ['sh', '-c', 'chmod 700 /opt/adguardhome/work && chmod 700 /opt/adguardhome/conf']
+        command: ['sh', '-c', 'sudo chmod 700 /opt/adguardhome/work && chmod 700 /opt/adguardhome/conf']
         volumeMounts:
         - name: adguard-work
           mountPath: /opt/adguardhome/work
