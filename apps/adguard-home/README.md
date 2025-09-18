@@ -1,65 +1,91 @@
-# AdGuard Home
+# AdGuard Home Backup and Restore Solution
 
-This directory contains the Kustomize manifests for deploying AdGuard Home to the Kubernetes cluster.
+This project provides a complete backup and restore solution for AdGuard Home running in Kubernetes.
 
-## Overview
+## Features
 
-AdGuard Home is a network-wide software for blocking ads and tracking. It operates as a DNS server that blocks unwanted requests when your device attempts to connect to a server or domain that serves ads, tracking scripts, and malware.
+- **Automatic Daily Backups**: Configuration is automatically backed up to a Git repository every day
+- **Manual Restore**: Configuration can be manually restored from Git when needed
+- **Secure**: Sensitive information is properly handled and stored using sealed secrets
+- **Complete Coverage**: All AdGuard Home configuration endpoints are backed up
+- **Easy Deployment**: Deployed using Kubernetes manifests and Kustomize
 
 ## Components
 
-- **Deployment**: Runs the AdGuard Home container with emptyDir storage for configuration and data
-- **Service**: Exposes AdGuard Home HTTP and DNS ports within the cluster
-- **Ingress**: Configures Traefik to route external traffic to AdGuard Home
-- **Certificate**: TLS certificate for secure access via HTTPS
-- **CronJob**: Periodically backs up AdGuard Home configuration via API to git
-- **Job**: Manually triggered job to apply configuration via API from git
-- **Scripts ConfigMap**: Contains backup and apply scripts
-- **Backup File**: `configmap.backup` - File that stores the current configuration in git
+- **Backup CronJob**: Runs daily to backup AdGuard Home configuration
+- **Apply Job**: Can be manually triggered to restore configuration from Git
+- **Custom Docker Image**: Contains all necessary tools (curl, git, jq)
+- **Sealed Secrets**: Securely stores sensitive information (Git credentials, admin password)
+- **ConfigMaps**: Contains backup and apply scripts
+
+## Prerequisites
+
+- Kubernetes cluster with cert-manager installed
+- Sealed Secrets controller installed
+- Git repository for storing configuration backups
+- GitHub Personal Access Token with appropriate permissions
+
+## Deployment
+
+```bash
+kubectl apply -k /home/ubuntu/project/apps/adguard-home/prd
+```
 
 ## Configuration
 
-The application is configured through:
-- Web UI for runtime configuration
-- API for programmatic configuration management
-- Git for persistent configuration storage
+The solution uses sealed secrets for sensitive information:
 
-## Access
+- `adguard-home-git-token`: Git repository URL, username, and token
+- `adguard-home-admin-password`: AdGuard Home admin password
+- `ghcr-secret`: GHCR credentials for pulling custom Docker image
 
-AdGuard Home is accessible at:
-- Web interface: https://dns-adg.djasko.com
-- DNS server: dns-adg.djasko.com (port 53)
+## Usage
 
-## Configuration Management
+### Trigger Backup Manually
 
-Since AdGuard Home modifies its configuration at runtime, we use a GitOps approach for configuration management:
-
-1. **Initial Setup**: AdGuard Home starts with default configuration
-2. **Runtime Configuration**: Configure through the web UI
-3. **Backup**: The CronJob (`backup-cronjob.yaml`) runs daily to:
-   - Get the current configuration via API
-   - Update `configmap.backup` with the current configuration
-   - Commit and push changes to git
-4. **Apply Configuration**: The Job (`apply-config-job.yaml`) can be manually triggered to:
-   - Get the configuration from `configmap.backup` in git
-   - Apply it via the AdGuard Home API
-
-To manually trigger the configuration apply job:
 ```bash
-# Unsuspend and start the job
-kubectl patch job adguard-home-apply-config -n adguard-home -p '{"spec":{"suspend":false}}'
-
-# Or create a new job from the template
-kubectl create job --from=job/adguard-home-apply-config adguard-home-apply-config-manual-$(date +%s) -n adguard-home
+kubectl create job --from=cronjob/adguard-home-backup adguard-home-backup-manual -n adguard-home
 ```
 
-## Required Configuration
+### Trigger Restore Manually
 
-Before deploying, you need to update the scripts with your specific configuration:
+```bash
+kubectl patch job adguard-home-apply-config -n adguard-home -p '{"spec":{"suspend":false}}'
+```
 
-1. Update the `GIT_REPO` variable in `scripts-configmap.yaml` with your git repository URL
-2. Update the `GIT_USERNAME` and `GIT_EMAIL` variables in `scripts-configmap.yaml` with your git credentials
-3. Update the `CONFIG_FILE_PATH` variable if you want to store the configuration in a different location
-4. Generate a git token with appropriate permissions and add it using the `generate-sealed-secrets.sh` script
+## Security
 
-Note: The initial configuration is managed entirely through the web UI or API. The `configmap.yaml` file has been removed as it had no value in the current setup.
+- Sensitive information (password hashes) is removed from backups
+- Git credentials are stored as sealed secrets
+- AdGuard Home admin password is stored as a sealed secret
+- All API calls use proper authentication
+
+## Troubleshooting
+
+### Check Job Status
+
+```bash
+kubectl get jobs -n adguard-home
+kubectl get pods -n adguard-home
+```
+
+### View Job Logs
+
+```bash
+kubectl logs -n adguard-home <pod-name>
+```
+
+### Common Issues
+
+1. **Bad Gateway Error**: Usually caused by incorrect port mapping - ensure service forwards port 80 to container port 80
+2. **Authentication Issues**: Verify that admin password is correctly set in sealed secrets
+3. **Git Operations Failures**: Check that Git credentials are correctly set in sealed secrets
+4. **Configuration Not Backed Up**: Verify that all configuration endpoints are accessible via API
+
+## Contributing
+
+Feel free to submit issues and pull requests to improve this solution.
+
+## License
+
+This project is licensed under the MIT License.

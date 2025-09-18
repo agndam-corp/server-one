@@ -81,7 +81,7 @@ EOF
       curl -sfL https://get.k3s.io | sh -s - \
         --write-kubeconfig-mode 644 \
         --secrets-encryption \
-        --disable local-storage
+      #  --disable local-storage
       #  --disable metrics-server
 
       # Wait for K3s to be ready

@@ -26,6 +26,12 @@ spec:
         - containerPort: 53
           name: dns-udp
           protocol: UDP
+        - containerPort: 443
+          name: https
+        - containerPort: 853
+          name: dot
+        - containerPort: 784
+          name: doq
         resources:
           requests:
             memory: "256Mi"
@@ -33,3 +39,11 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "500m"
+        volumeMounts:
+        - name: tls-certs
+          mountPath: /etc/adguardhome/tls
+          readOnly: true
+      volumes:
+      - name: tls-certs
+        secret:
+          secretName: adguard-home-djasko-com-tls

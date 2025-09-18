@@ -278,14 +278,6 @@ data:
     # Apply configuration via API
     echo "Applying AdGuard Home configuration..."
 
-    # Apply general status/settings
-    if [ -f "$CONFIG_FILE_PATH/general_status.json" ]; then
-      echo "Applying general status/settings..."
-      # Note: The general status contains mostly runtime information, not configuration
-      # We might not want to apply this directly
-      echo "Skipping general status/settings - contains runtime information"
-    fi
-
     # Apply DNS configuration
     if [ -f "$CONFIG_FILE_PATH/dns_config.json" ]; then
       echo "Applying DNS configuration..."
@@ -394,23 +386,74 @@ data:
         http://adguard-home.adguard-home.svc.cluster.local/control/access/set
     fi
 
-    # Apply rewrite rules
-    if [ -f "$CONFIG_FILE_PATH/rewrite_list.json" ]; then
-      echo "Applying rewrite rules..."
-      # Note: This would need to be handled differently since it's a list of rules
-      # We would need to iterate through the rules and apply them individually
-      echo "Skipping rewrite rules for now - would need individual rule handling"
-    fi
-
-    # Apply clients
-    if [ -f "$CONFIG_FILE_PATH/clients.json" ]; then
-      echo "Applying clients configuration..."
-      # Note: This would need special handling since it's a list of clients
-      # We would need to iterate through the clients and apply them individually
-      echo "Skipping clients for now - would need individual client handling"
+    # Apply TLS configuration
+    if [ -f "$CONFIG_FILE_PATH/tls_status.json" ]; then
+      echo "Applying TLS configuration..."
+      curl -X POST \
+        -u "admin:$ADMIN_PASSWORD" \
+        -H "Content-Type: application/json" \
+        -d @"$CONFIG_FILE_PATH/tls_status.json" \
+        http://adguard-home.adguard-home.svc.cluster.local/control/tls/configure
     fi
 
     echo "Configuration applied successfully"
+
+    # Clean up
+    cd /
+    rm -rf $TEMP_DIR
+
+  install-config.sh: |
+    #!/bin/sh
+    # Script to perform initial installation of AdGuard Home configuration
+    set -e
+
+    # Create temporary directory
+    TEMP_DIR="/tmp/adguard-install-$(date +%s)"
+    mkdir -p $TEMP_DIR
+    cd $TEMP_DIR
+
+    # Wait for AdGuard Home to be ready on port 3000 (initial setup)
+    until curl -s http://adguard-home.adguard-home.svc.cluster.local:3000/control/install/get_addresses > /dev/null; do
+      echo "Waiting for AdGuard Home to be ready for initial setup on port 3000..."
+      sleep 5
+    done
+
+    # Prepare initial configuration
+    echo "Preparing initial configuration..."
+    
+    # Create the initial configuration JSON
+    cat > initial_config.json <<EOF
+    {
+      "dns": {
+        "ip": "0.0.0.0",
+        "port": 53
+      },
+      "web": {
+        "ip": "0.0.0.0",
+        "port": 80
+      },
+      "username": "admin",
+      "password": "$ADMIN_PASSWORD"
+    }
+    EOF
+
+    echo "Initial configuration prepared:"
+    cat initial_config.json
+
+    # Apply initial configuration
+    echo "Applying initial configuration..."
+    RESPONSE=$(curl -s -X POST \
+      -H "Content-Type: application/json" \
+      -d @initial_config.json \
+      http://adguard-home.adguard-home.svc.cluster.local:3000/control/install/configure)
+
+    if [ $? -eq 0 ]; then
+      echo "Initial configuration applied successfully"
+      echo "Response: $RESPONSE"
+    else
+      echo "Failed to apply initial configuration"
+      exit 1
+    fi
 
     # Clean up
     cd /
