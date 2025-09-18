@@ -17,7 +17,7 @@ spec:
       initContainers:
       - name: init-directories
         image: busybox:latest
-        command: ['sh', '-c', 'mkdir -p /opt/adguardhome/conf /opt/adguardhome/work && touch /opt/adguardhome/conf/AdGuardHome.yaml && chown -R 1000:3000 /opt/adguardhome']
+        command: ['sh', '-c', 'mkdir -p /opt/adguardhome/conf /opt/adguardhome/work && chown -R 1000:3000 /opt/adguardhome']
         securityContext:
           runAsUser: 0
           runAsGroup: 0

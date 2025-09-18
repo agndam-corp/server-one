@@ -438,7 +438,7 @@ data:
     EOF
 
     echo "Initial configuration prepared:"
-    cat initial_config.json
+    #cat initial_config.json
 
     # Apply initial configuration
     echo "Applying initial configuration..."
