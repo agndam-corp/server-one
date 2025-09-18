@@ -3,10 +3,14 @@ kind: Ingress
 metadata:
   name: adguard-home
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
 spec:
   ingressClassName: traefik
+  tls:
+  - hosts:
+    - dns-adg.djasko.com
+    secretName: adguard-home-djasko-com-tls
   rules:
   - host: dns-adg.djasko.com
     http:
@@ -17,8 +21,4 @@ spec:
           service:
             name: adguard-home
             port:
-              number: 80
-  tls:
-  - hosts:
-    - dns-adg.djasko.com
-    secretName: adguard-home-djasko-com-tls
+              number: 443
