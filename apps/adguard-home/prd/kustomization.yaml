@@ -7,7 +7,6 @@ resources:
 - service.yaml
 - deployment.yaml
 - ingress.yaml
-- scripts-configmap.yaml
 - install-config-cronjob.yaml
 - apply-config-job.yaml
 - backup-cronjob.yaml
