@@ -43,7 +43,12 @@ spec:
         - name: tls-certs
           mountPath: /etc/adguardhome/tls
           readOnly: true
+        - name: adguard-data
+          mountPath: /opt/adguardhome
       volumes:
       - name: tls-certs
         secret:
           secretName: adguard-home-djasko-com-tls
+      - name: adguard-data
+        persistentVolumeClaim:
+          claimName: adguard-home-pvc
