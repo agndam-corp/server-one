@@ -16,8 +16,8 @@ curl -s -u "admin:$ADMIN_PASSWORD" \
 echo "Current TLS configuration:"
 cat current_tls_config.json
 
-# Create TLS configuration with HTTPS disabled (Traefik handles TLS termination)
-# Enable only DNS-over-TLS and DNS-over-QUIC
+# Create TLS configuration to enable HTTPS on port 443
+# Also enable DNS-over-TLS and DNS-over-QUIC
 cat > tls_config.json <<EOF
 {
   "enabled": true,
@@ -25,8 +25,8 @@ cat > tls_config.json <<EOF
   "certificate_path": "/etc/adguardhome/tls/tls.crt",
   "private_key_path": "/etc/adguardhome/tls/tls.key",
   "private_key_saved": true,
-  "force_https": false,
-  "port_https": 0,
+  "force_https": true,
+  "port_https": 443,
   "port_dns_over_tls": 853,
   "port_dns_over_quic": 784,
   "port_dnscrypt": 0,
