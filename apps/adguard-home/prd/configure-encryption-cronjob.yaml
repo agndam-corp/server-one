@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: adguard-home-configure-encryption
+spec:
+  schedule: "0 0 1 1 *"  # Run once a year (dummy schedule, we'll trigger manually)
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: configure-encryption
+            image: ghcr.io/damianjaskolski95/adguard-home-backup:latest
+            command:
+            - /scripts/configure-encryption.sh
+            env:
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: adguard-home-admin-password
+                  key: password
+            volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+              readOnly: true
+          imagePullSecrets:
+          - name: ghcr-secret
+          restartPolicy: OnFailure
+          volumes:
+          - name: scripts
+            configMap:
+              name: adguard-home-scripts
+              defaultMode: 0755

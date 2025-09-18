@@ -24,6 +24,7 @@ spec:
             chown -R 1000:3000 /opt/adguardhome
             chmod -R 700 /opt/adguardhome/work
             chmod 600 /opt/adguardhome/work/data/sessions.db
+            chmod 600 /opt/adguardhome/work/data/stats.db
             echo "done"
         securityContext:
           runAsUser: 0

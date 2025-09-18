@@ -1,18 +1,25 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: adguard-home
-
 resources:
 - namespace.yaml
-- deployment.yaml
+- pvc.yaml
 - service.yaml
+- deployment.yaml
 - ingress.yaml
 - scripts-configmap.yaml
-- backup-cronjob.yaml
-- apply-config-job.yaml
 - install-config-cronjob.yaml
-- pvc.yaml
+- apply-config-job.yaml
+- backup-cronjob.yaml
+- configure-encryption-cronjob.yaml
+
+configMapGenerator:
+- name: adguard-home-scripts
+  files:
+  - scripts/backup-config.sh
+  - scripts/apply-config.sh
+  - scripts/install-config.sh
+  - scripts/configure-encryption.sh
 
 generatorOptions:
   disableNameSuffixHash: true
