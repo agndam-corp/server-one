@@ -3,7 +3,6 @@ kind: Ingress
 metadata:
   name: adguard-home
   annotations:
-    traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls.passthrough: "true"
 spec:
