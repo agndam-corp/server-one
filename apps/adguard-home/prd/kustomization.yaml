@@ -6,7 +6,7 @@ resources:
 - pvc.yaml
 - service.yaml
 - deployment.yaml
-- ingress.yaml
+- ingressroute-tcp.yaml
 - install-config-cronjob.yaml
 - apply-config-job.yaml
 - backup-cronjob.yaml
