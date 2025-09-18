@@ -14,6 +14,19 @@ spec:
       labels:
         app: adguard-home
     spec:
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+        runAsGroup: 3000
+      initContainers:
+      - name: set-permissions
+        image: busybox:latest
+        command: ['sh', '-c', 'chmod 700 /opt/adguardhome/work && chmod 700 /opt/adguardhome/conf']
+        volumeMounts:
+        - name: adguard-work
+          mountPath: /opt/adguardhome/work
+        - name: adguard-conf
+          mountPath: /opt/adguardhome/conf
       containers:
       - name: adguard-home
         image: adguard/adguardhome:v0.107.66
