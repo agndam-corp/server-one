@@ -11,6 +11,7 @@ resources:
 - scripts-configmap.yaml
 - backup-cronjob.yaml
 - apply-config-job.yaml
+- pvc.yaml
 
 generatorOptions:
   disableNameSuffixHash: true
