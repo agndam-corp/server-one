@@ -18,16 +18,14 @@ cat current_tls_config.json
 
 # Create TLS configuration with HTTPS, DoH, and DoT enabled
 # Disable plain DNS as requested
+# Using certificate paths instead of embedding the certificate content
 cat > tls_config.json <<EOF
 {
   "enabled": true,
   "server_name": "dns-adg.djasko.com",
-  "certificates": [
-    {
-      "certificate": "/etc/adguardhome/tls/tls.crt",
-      "key": "/etc/adguardhome/tls/tls.key"
-    }
-  ],
+  "certificate_path": "/etc/adguardhome/tls/tls.crt",
+  "private_key_path": "/etc/adguardhome/tls/tls.key",
+  "private_key_saved": true,
   "force_https": true,
   "port_https": 443,
   "port_dns_over_tls": 853,
