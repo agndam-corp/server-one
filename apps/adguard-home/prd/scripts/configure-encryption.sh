@@ -3,7 +3,7 @@
 set -e
 
 # Wait for AdGuard Home to be ready
-until curl -s -u "admin:$ADMIN_PASSWORD" https://adguard-home.adguard-home.svc.cluster.local/control/status --insecure > /dev/null; do
+until curl -s -u "admin:$ADMIN_PASSWORD" http://adguard-home.adguard-home.svc.cluster.local/control/status > /dev/null; do
   echo "Waiting for AdGuard Home to be ready..."
   sleep 5
 done
@@ -11,7 +11,7 @@ done
 # Get current TLS configuration to see what we're working with
 echo "Getting current TLS configuration..."
 curl -s -u "admin:$ADMIN_PASSWORD" \
-  https://adguard-home.adguard-home.svc.cluster.local/control/tls/status --insecure > current_tls_config.json
+  http://adguard-home.adguard-home.svc.cluster.local/control/tls/status > current_tls_config.json
 
 echo "Current TLS configuration:"
 cat current_tls_config.json
@@ -25,15 +25,15 @@ cat > tls_config.json <<EOF
   "certificate_path": "/etc/adguardhome/tls/tls.crt",
   "private_key_path": "/etc/adguardhome/tls/tls.key",
   "private_key_saved": true,
-  "force_https": true,
+  "force_https": false,
   "port_https": 443,
   "port_dns_over_tls": 853,
   "port_dns_over_quic": 853,
   "port_dnscrypt": 0,
   "dnscrypt_config_file": "",
-  "allow_unencrypted_doh": false,
+  "allow_unencrypted_doh": true,
   "strict_sni_check": false,
-  "disable_plaintext": true,
+  "disable_plaintext": false,
   "serve_plain_dns": true
 }
 EOF
@@ -50,7 +50,7 @@ CONFIGURE_RESPONSE_CODE=$(curl -s -o /tmp/configure_response.txt -w "%{http_code
   -u "admin:$ADMIN_PASSWORD" \
   -H "Content-Type: application/json" \
   -d @tls_config.json \
-  https://adguard-home.adguard-home.svc.cluster.local/control/tls/configure --insecure)
+  http://adguard-home.adguard-home.svc.cluster.local/control/tls/configure)
 
 echo "Configuration response code: $CONFIGURE_RESPONSE_CODE"
 echo "Configuration response body:"
@@ -70,7 +70,7 @@ echo "Restarting AdGuard Home to apply TLS configuration..."
 RESTART_RESPONSE_CODE=$(curl -s -o /tmp/restart_response.txt -w "%{http_code}" \
   -u "admin:$ADMIN_PASSWORD" \
   -X POST \
-  https://adguard-home.adguard-home.svc.cluster.local/control/restart --insecure)
+  http://adguard-home.adguard-home.svc.cluster.local/control/restart)
 
 echo "Restart response code: $RESTART_RESPONSE_CODE"
 echo "Restart response body:"
