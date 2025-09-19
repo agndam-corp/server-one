@@ -20,10 +20,6 @@ spec:
     port: 443
     protocol: TCP
     targetPort: websecure
-  - name: dns-tls
-    port: 853
-    protocol: TCP
-    targetPort: 853
   selector:
     app.kubernetes.io/instance: traefik-kube-system
     app.kubernetes.io/name: traefik
