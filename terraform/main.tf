@@ -62,6 +62,11 @@ spec:
         nodePort: 31292
       websecure:
         nodePort: 32286
+      dot:
+        port: 853
+        nodePort: 30553
+    additionalArguments:
+      - "--entryPoints.dot.address=:853/tcp"
 EOF
       sudo mv /tmp/traefik-config.yaml /var/lib/rancher/k3s/server/manifests/traefik-config.yaml
       
