@@ -1,2 +1,1 @@
-<a href="https://adguard-home.adguard-home.svc.cluster.local/control/access/list">Temporary Redirect</a>.
-
+{"allowed_clients":null,"disallowed_clients":null,"blocked_hosts":["version.bind","id.server","hostname.bind"]}
