@@ -64,24 +64,4 @@ if [ "$CONFIGURE_RESPONSE_CODE" -lt 200 ] || [ "$CONFIGURE_RESPONSE_CODE" -gt 29
 fi
 
 echo "TLS configuration applied successfully"
-
-# Restart AdGuard Home to apply changes
-echo "Restarting AdGuard Home to apply TLS configuration..."
-RESTART_RESPONSE_CODE=$(curl -s -o /tmp/restart_response.txt -w "%{http_code}" \
-  -u "admin:$ADMIN_PASSWORD" \
-  -X POST \
-  http://adguard-home.adguard-home.svc.cluster.local/control/restart)
-
-echo "Restart response code: $RESTART_RESPONSE_CODE"
-echo "Restart response body:"
-cat /tmp/restart_response.txt
-
-# Check if restart was successful (HTTP 2xx status)
-if [ "$RESTART_RESPONSE_CODE" -lt 200 ] || [ "$RESTART_RESPONSE_CODE" -gt 299 ]; then
-  echo "ERROR: Failed to restart AdGuard Home with HTTP $RESTART_RESPONSE_CODE"
-  echo "Exiting..."
-  exit 1
-fi
-
-echo "AdGuard Home restarted successfully"
-echo "TLS configuration applied and AdGuard Home restarted"
+echo "TLS configuration applied"
