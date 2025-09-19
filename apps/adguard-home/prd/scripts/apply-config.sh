@@ -142,14 +142,14 @@ if [ -f "$CONFIG_FILE_PATH/access_list.json" ]; then
 fi
 
 # Apply TLS configuration
-# if [ -f "$CONFIG_FILE_PATH/tls_status.json" ]; then
-#   echo "Applying TLS configuration..."
-#   curl -X POST \
-#     -u "admin:$ADMIN_PASSWORD" \
-#     -H "Content-Type: application/json" \
-#     -d @"$CONFIG_FILE_PATH/tls_status.json" \
-#     http://adguard-home.adguard-home.svc.cluster.local/control/tls/configure
-# fi
+if [ -f "$CONFIG_FILE_PATH/tls_status.json" ]; then
+  echo "Applying TLS configuration..."
+  curl -X POST \
+    -u "admin:$ADMIN_PASSWORD" \
+    -H "Content-Type: application/json" \
+    -d @"$CONFIG_FILE_PATH/tls_status.json" \
+    http://adguard-home.adguard-home.svc.cluster.local/control/tls/configure
+fi
 
 echo "Configuration applied successfully"
 
