@@ -12,3 +12,16 @@ spec:
       port: 443
   tls:
     passthrough: true
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: adguard-dot
+spec:
+  entryPoints:
+    - dot
+  routes:
+  - match: HostSNI(`dns-adg.djasko.com`)
+    services:
+    - name: adguard
+      port: 853

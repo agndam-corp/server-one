@@ -20,6 +20,11 @@ spec:
     port: 443
     protocol: TCP
     targetPort: websecure
+  - name: dot
+    nodePort: 30553
+    port: 853
+    protocol: TCP
+    targetPort: dot
   selector:
     app.kubernetes.io/instance: traefik-kube-system
     app.kubernetes.io/name: traefik
