@@ -3,8 +3,6 @@ kind: Ingress
 metadata:
   name: adguard-home-ui
   namespace: adguard-home
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-production-spaceship
 spec:
   tls:
   - hosts:
