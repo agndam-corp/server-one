@@ -1,2 +1,1 @@
-<a href="https://adguard-home.adguard-home.svc.cluster.local/control/status">Temporary Redirect</a>.
-
+{"version":"v0.107.66","language":"","dns_addresses":["127.0.0.1","::1","10.42.0.213","fe80::30ff:bdff:fed3:6dd8%eth0","https://dns-adg.djasko.com/dns-query","tls://dns-adg.djasko.com:853","quic://dns-adg.djasko.com:853"],"dns_port":53,"http_port":80,"protection_disabled_duration":0,"protection_enabled":true,"dhcp_available":true,"running":true}
