@@ -106,7 +106,7 @@ crowdsec:
         type: leaky
         name: custom/traefik-suspicious-patterns
         description: "Detect suspicious patterns in DNS queries"
-        filter: "evt.Meta.log_type == 'traefik' && evt.Parsed.request_host matches '.*\\.(malware|phishing|randsomware|cryptominer)\\..*'i"
+        filter: "evt.Meta.log_type == 'traefik' && evt.Parsed.request_host matches '.*(malware|phishing|randsomware|cryptominer).*'"
         groupby: "evt.Meta.source_ip"
         capacity: 10
         leakspeed: "60s"
@@ -124,10 +124,10 @@ crowdsec:
           description: "Extract DNS query information from Traefik logs"
           nodes:
             - grok:
-                pattern: "X-Forwarded-For: %{IP:real_source_ip}(, .*)?"
+                pattern: "X-Forwarded-For: %%{IP:real_source_ip}(, .*)?"
                 apply_on: message
             - grok:
-                pattern: "Host: %{DATA:request_host}"
+                pattern: "Host: %%{DATA:request_host}"
                 apply_on: message
             - statics:
                 - meta: log_type
