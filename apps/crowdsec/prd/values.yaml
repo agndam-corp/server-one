@@ -1,149 +1,149 @@
-crowdsec:
-  container_runtime: containerd
-  # values.yaml for CrowdSec deployment
-  # This file contains custom configuration for monitoring Traefik logs
+# values.yaml for CrowdSec deployment
+# This file contains custom configuration for monitoring Traefik logs
 
-  # Configure agent to monitor Traefik logs
-  agent:
-    # Enable agent to collect logs
-    enabled: true
-    
-    # Configure acquisition to monitor Traefik logs
-    acquisition:
-      - namespace: "kube-system"
-        podName: "traefik-*"
-        program: "traefik"
-    
-    # Additional acquisition (empty for now)
-    additionalAcquisition: []
-    
-    # Resources for agent
-    resources:
-      limits:
-        memory: 128Mi
-        cpu: 500m
-      requests:
-        cpu: 250m
-        memory: 64Mi
+container_runtime: containerd
 
-  # Configuration for local API
-  lapi:
-    enabled: true
-    # Service configuration
-    service:
-      type: ClusterIP
-    
-    # Resources for LAPI
-    resources:
-      limits:
-        memory: 256Mi
-        cpu: 500m
-      requests:
-        cpu: 250m
-        memory: 128Mi
-    
-    # Enable persistent volumes for LAPI
-    persistentVolume:
-      # Persistent volume for data folder. Stores e.g. registered bouncer api keys
-      data:
-        enabled: true
-        accessModes:
-          - ReadWriteOnce
-        storageClassName: ""
-        existingClaim: ""
-        size: 1Gi
-      # Persistent volume for config folder. Stores e.g. online api credentials
-      config:
-        enabled: true
-        accessModes:
-          - ReadWriteOnce
-        storageClassName: ""
-        existingClaim: ""
-        size: 100Mi
-    
-    # Environment variables for LAPI (including enrollment and bouncer keys)
-    env:
-      - name: ENROLL_KEY
-        valueFrom:
-          secretKeyRef:
-            name: crowdsec-secrets
-            key: enrollment-key
-      - name: ENROLL_INSTANCE_NAME
-        value: "k8s-crowdsec"
-      - name: ENROLL_TAGS
-        value: "k8s,traefik,dns"
-      - name: BOUNCER_KEY_traefik
-        valueFrom:
-          secretKeyRef:
-            name: crowdsec-secrets
-            key: bouncer-key
+# Configure agent to monitor Traefik logs
+agent:
+  # Enable agent to collect logs
+  enabled: true
+  
+  # Configure acquisition to monitor Traefik logs
+  acquisition:
+    - namespace: "kube-system"
+      podName: "traefik-*"
+      program: "traefik"
+  
+  # Additional acquisition (empty for now)
+  additionalAcquisition: []
+  
+  # Resources for agent
+  resources:
+    limits:
+      memory: 128Mi
+      cpu: 500m
+    requests:
+      cpu: 250m
+      memory: 64Mi
 
-  # Configure custom configurations
-  config:
-    # Enable security scenarios from CrowdSec hub
-    collections:
-      - crowdsecurity/base
-      - crowdsecurity/linux
-      - crowdsecurity/traefik
-      - crowdsecurity/http-cve
-    
-    # Custom scenarios for Traefik
-    scenarios:
-      traefik-dns-abuse.yaml: |
-        type: trigger
-        name: custom/traefik-dns-abuse
-        description: "Detect DNS abuse through Traefik"
-        filter: "evt.Meta.log_type == 'traefik' && evt.Parsed.request_host endsWith '.dns-adg.djasko.com'"
-        groupby: "evt.Meta.source_ip"
-        capacity: 1000
-        leak_speed: "100s"
-        labels:
-          type: dns_abuse
-          remediation: true
-      
-      traefik-suspicious-patterns.yaml: |
-        type: trigger
-        name: custom/traefik-suspicious-patterns
-        description: "Detect suspicious patterns in DNS queries"
-        filter: "evt.Meta.log_type == 'traefik' && evt.Parsed.request_host matches '.*\\.(malware|phishing|randsomware|cryptominer)\\..*'i"
-        groupby: "evt.Meta.source_ip"
-        capacity: 10
-        leak_speed: "60s"
-        labels:
-          type: suspicious_dns
-          remediation: true
-
-    # Custom parsers for Traefik logs
-    parsers:
-      s02-enrich:
-        traefik-dns-extractor.yaml: |
-          filter: "evt.Line.Labels.type == 'traefik' && evt.Parsed.request_host endsWith '.dns-adg.djasko.com'"
-          onsuccess: next_stage
-          name: custom/traefik-dns-extractor
-          description: "Extract DNS query information from Traefik logs"
-          nodes:
-            - grok:
-                pattern: "X-Forwarded-For: %{IP:real_source_ip}(, .*)?"
-                apply_on: message
-            - grok:
-                pattern: "Host: %{DATA:request_host}"
-                apply_on: message
-            - statics:
-                - meta: log_type
-                  value: traefik_dns
-                - meta: source_ip
-                  expression: "evt.Parsed.real_source_ip"
-                - meta: domain
-                  expression: "evt.Parsed.request_host"
-
-  # Configure bouncer for IP blocking
-  bouncer:
-    # Install the Kubernetes bouncer
-    enabled: true
-    # Bouncer configuration
+# Configuration for local API
+lapi:
+  enabled: true
+  # Service configuration
+  service:
+    type: ClusterIP
+  
+  # Resources for LAPI
+  resources:
+    limits:
+      memory: 256Mi
+      cpu: 500m
+    requests:
+      cpu: 250m
+      memory: 128Mi
+  
+  # Enable persistent volumes for LAPI
+  persistentVolume:
+    # Persistent volume for data folder. Stores e.g. registered bouncer api keys
+    data:
+      enabled: true
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: ""
+      existingClaim: ""
+      size: 1Gi
+    # Persistent volume for config folder. Stores e.g. online api credentials
     config:
-      bouncer.yaml: |
-        # CrowdSec bouncer configuration
-        name: kubernetes-bouncer
-        log_level: info
-        api_url: http://crowdsec-lapi:8080/
+      enabled: true
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: ""
+      existingClaim: ""
+      size: 100Mi
+  
+  # Environment variables for LAPI (including enrollment and bouncer keys)
+  env:
+    - name: ENROLL_KEY
+      valueFrom:
+        secretKeyRef:
+          name: crowdsec-secrets
+          key: enrollment-key
+    - name: ENROLL_INSTANCE_NAME
+      value: "k8s-crowdsec"
+    - name: ENROLL_TAGS
+      value: "k8s,traefik,dns"
+    - name: BOUNCER_KEY_traefik
+      valueFrom:
+        secretKeyRef:
+          name: crowdsec-secrets
+          key: bouncer-key
+
+# Configure custom configurations
+config:
+  # Enable security scenarios from CrowdSec hub
+  collections:
+    - crowdsecurity/base
+    - crowdsecurity/linux
+    - crowdsecurity/traefik
+    - crowdsecurity/http-cve
+  
+  # Custom scenarios for Traefik
+  scenarios:
+    traefik-dns-abuse.yaml: |
+      type: leaky
+      name: custom/traefik-dns-abuse
+      description: "Detect DNS abuse through Traefik"
+      filter: "evt.Meta.log_type == 'traefik' && evt.Parsed.request_host endsWith '.dns-adg.djasko.com'"
+      groupby: "evt.Meta.source_ip"
+      capacity: 1000
+      leak_speed: "100s"
+      labels:
+        type: dns_abuse
+        remediation: true
+    
+    traefik-suspicious-patterns.yaml: |
+      type: leaky
+      name: custom/traefik-suspicious-patterns
+      description: "Detect suspicious patterns in DNS queries"
+      filter: "evt.Meta.log_type == 'traefik' && evt.Parsed.request_host matches '.*\\.(malware|phishing|randsomware|cryptominer)\\..*'i"
+      groupby: "evt.Meta.source_ip"
+      capacity: 10
+      leak_speed: "60s"
+      labels:
+        type: suspicious_dns
+        remediation: true
+
+  # Custom parsers for Traefik logs
+  parsers:
+    s02-enrich:
+      traefik-dns-extractor.yaml: |
+        filter: "evt.Line.Labels.type == 'traefik' && evt.Parsed.request_host endsWith '.dns-adg.djasko.com'"
+        onsuccess: next_stage
+        name: custom/traefik-dns-extractor
+        description: "Extract DNS query information from Traefik logs"
+        nodes:
+          - grok:
+              pattern: "X-Forwarded-For: %{IP:real_source_ip}(, .*)?"
+              apply_on: message
+          - grok:
+              pattern: "Host: %{DATA:request_host}"
+              apply_on: message
+          - statics:
+              - meta: log_type
+                value: traefik_dns
+              - meta: source_ip
+                expression: "evt.Parsed.real_source_ip"
+              - meta: domain
+                expression: "evt.Parsed.request_host"
+
+# Configure bouncer for IP blocking
+bouncer:
+  # Install the Kubernetes bouncer
+  enabled: true
+  # Bouncer configuration
+  config:
+    bouncer.yaml: |
+      # CrowdSec bouncer configuration
+      name: kubernetes-bouncer
+      log_level: info
+      api_url: http://crowdsec-lapi:8080/
