@@ -1,21 +1,21 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: adguard-home-ui
-  namespace: adguard-home
-spec:
-  tls:
-  - hosts:
-    - dns-adg-ui.djasko.com
-    secretName: adguard-home-ui-djasko-com-tls
-  rules:
-  - host: dns-adg-ui.djasko.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: adguard-home
-            port:
-              number: 80
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: adguard-home-ui
+#   namespace: adguard-home
+# spec:
+#   tls:
+#   - hosts:
+#     - dns-adg-ui.djasko.com
+#     secretName: adguard-home-ui-djasko-com-tls
+#   rules:
+#   - host: dns-adg-ui.djasko.com
+#     http:
+#       paths:
+#       - path: /
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: adguard-home
+#             port:
+#               number: 80

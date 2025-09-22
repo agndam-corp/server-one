@@ -7,7 +7,7 @@ resources:
 - service.yaml
 - deployment.yaml
 - ingressroute-tcp.yaml
-- ingress-ui.yaml
+# - ingress-ui.yaml
 - install-config-cronjob.yaml
 - apply-config-job.yaml
 - backup-cronjob.yaml
