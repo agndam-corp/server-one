@@ -95,6 +95,9 @@ crowdsec:
       - crowdsecurity/windows
       - crowdsecurity/microsoft-iis
       - crowdsecurity/generic-linux
+      - crowdsecurity/dns
+      - crowdsecurity/apache2
+      - crowdsecurity/firewall
     
     # Custom scenarios for Traefik
     scenarios:
