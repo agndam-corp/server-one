@@ -1,7 +1,7 @@
-crowdsec:
-  # values.yaml for CrowdSec deployment
-  # This file contains custom configuration for monitoring Traefik logs
+# values.yaml for CrowdSec deployment
+# This file contains custom configuration for monitoring Traefik logs
 
+crowdsec:
   container_runtime: containerd
 
   # Configure agent to monitor Traefik logs
@@ -97,7 +97,7 @@ crowdsec:
         filter: "evt.Meta.log_type == 'traefik' && evt.Parsed.request_host endsWith '.dns-adg.djasko.com'"
         groupby: "evt.Meta.source_ip"
         capacity: 1000
-        leak_speed: "100s"
+        duration: "1m"
         labels:
           type: dns_abuse
           remediation: true
@@ -109,7 +109,7 @@ crowdsec:
         filter: "evt.Meta.log_type == 'traefik' && evt.Parsed.request_host matches '.*\\.(malware|phishing|randsomware|cryptominer)\\..*'i"
         groupby: "evt.Meta.source_ip"
         capacity: 10
-        leak_speed: "60s"
+        duration: "1m"
         labels:
           type: suspicious_dns
           remediation: true
