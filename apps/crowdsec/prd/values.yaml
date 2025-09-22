@@ -72,11 +72,11 @@ crowdsec:
         value: "k8s-crowdsec"
       - name: ENROLL_TAGS
         value: "k8s,traefik,dns"
-      # - name: BOUNCER_KEY_traefik
-      #   valueFrom:
-      #     secretKeyRef:
-      #       name: crowdsec-secrets
-      #       key: bouncer-key
+      - name: BOUNCER_KEY_traefik
+        valueFrom:
+          secretKeyRef:
+            name: crowdsec-secrets
+            key: bouncer-key
 
   # Configure custom configurations
   config:
