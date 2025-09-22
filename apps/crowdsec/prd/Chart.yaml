@@ -1,0 +1,9 @@
+apiVersion: v2
+name: crowdsec
+version: 0.1.0
+appVersion: "1.0"
+description: CrowdSec for Kubernetes - Security Engine for AdGuard Home
+dependencies:
+  - name: crowdsec
+    version: 0.20.0
+    repository: https://crowdsecurity.github.io/helm-charts

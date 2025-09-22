@@ -66,6 +66,16 @@ echo "Enter AdGuard Home Git Username (for authentication):"
 read ADGUARD_GIT_USERNAME
 echo
 
+# CrowdSec Enrollment Key
+echo "Enter CrowdSec Enrollment Key (leave empty to generate a random one):"
+read CROWDSEC_ENROLL_KEY
+echo
+
+# CrowdSec Bouncer Key
+echo "Enter CrowdSec Bouncer Key (leave empty to generate a random one):"
+read CROWDSEC_BOUNCER_KEY
+echo
+
 # Create Kubernetes secrets in temporary directory
 echo "Creating Kubernetes secrets..."
 
@@ -123,6 +133,25 @@ if [ -n "$ADGUARD_ADMIN_PASSWORD_HASH" ]; then
     -o yaml > $TEMP_DIR/adguard-home-admin-password-hash.yaml
 fi
 
+# CrowdSec Secrets
+# Generate random keys if not provided
+if [ -z "$CROWDSEC_ENROLL_KEY" ]; then
+  CROWDSEC_ENROLL_KEY=$(openssl rand -hex 32)
+  echo "Generated CrowdSec Enrollment Key: $CROWDSEC_ENROLL_KEY"
+fi
+
+if [ -z "$CROWDSEC_BOUNCER_KEY" ]; then
+  CROWDSEC_BOUNCER_KEY=$(openssl rand -hex 32)
+  echo "Generated CrowdSec Bouncer Key: $CROWDSEC_BOUNCER_KEY"
+fi
+
+kubectl create secret generic crowdsec-secrets \
+  --from-literal=enrollment-key="$CROWDSEC_ENROLL_KEY" \
+  --from-literal=bouncer-key="$CROWDSEC_BOUNCER_KEY" \
+  --namespace crowdsec \
+  --dry-run=client \
+  -o yaml > $TEMP_DIR/crowdsec-secrets.yaml
+
 # Seal the secrets
 echo "Sealing secrets..."
 
@@ -146,6 +175,9 @@ if [ -f $TEMP_DIR/adguard-home-admin-password-hash.yaml ]; then
   kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/adguard-home-admin-password-hash.yaml > /home/ubuntu/project/sealed-secrets/prd/adguard-home-admin-password-hash-sealed.yaml
 fi
 
+# CrowdSec SealedSecret
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/crowdsec-secrets.yaml > /home/ubuntu/project/sealed-secrets/prd/crowdsec-secrets-sealed.yaml
+
 # Clean up temporary files
 rm -rf $TEMP_DIR
 
@@ -154,3 +186,5 @@ echo "Files saved to /home/ubuntu/project/sealed-secrets/"
 echo
 echo "To apply the sealed secrets to your cluster, run:"
 echo "kubectl apply -f /home/ubuntu/project/sealed-secrets/"
+echo
+echo "Please save these keys in a secure location."
