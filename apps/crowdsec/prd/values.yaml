@@ -87,6 +87,14 @@ crowdsec:
       - crowdsecurity/linux
       - crowdsecurity/traefik
       - crowdsecurity/http-cve
+      - crowdsecurity/nginx
+      - crowdsecurity/ddos
+      - crowdsecurity/proftpd
+      - crowdsecurity/mysql
+      - crowdsecurity/postfix
+      - crowdsecurity/windows
+      - crowdsecurity/microsoft-iis
+      - crowdsecurity/generic-linux
     
     # Custom scenarios for Traefik
     scenarios:
