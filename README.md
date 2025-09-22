@@ -81,6 +81,15 @@ After applying sealed secrets, ArgoCD automatically deploys all applications thr
 - `terraform/` - Terraform configuration for infrastructure
 - `tools/` - Custom tools and utilities
 
+## DNS Configuration
+
+The setup includes a complete DNS solution with AdGuard Home providing:
+- DNS over HTTPS (DoH) at `dns-adg.djasko.com`
+- DNS over TLS (DoT) at `dns-adg.djasko.com`
+- Web UI at `dns-adg-ui.djasko.com`
+
+All DNS services are secured with Let's Encrypt certificates managed by cert-manager.
+
 ## Security Notes
 
 - All sensitive data is stored as sealed secrets and can be safely committed to the repository
@@ -91,3 +100,27 @@ After applying sealed secrets, ArgoCD automatically deploys all applications thr
 - Regularly rotate credentials and update sealed secrets
 - Use role-based access control (RBAC) to limit access to secrets
 - AdGuard Home configuration is managed through GitOps with automated backups to git
+
+## Troubleshooting
+
+### Common Issues
+
+1. **DNS Resolution Issues**: 
+   - Verify that the Traefik service is properly configured with the required ports
+   - Check that the IngressRouteTCP resources are correctly routing traffic
+   - Ensure that certificates are properly issued and mounted
+
+2. **Certificate Issues**:
+   - Check cert-manager logs: `kubectl logs -n cert-manager -l app=cert-manager`
+   - Verify certificate status: `kubectl get certificates -A`
+   - Check for certificate issuance errors: `kubectl describe certificate <name> -n <namespace>`
+
+3. **AdGuard Home Configuration**:
+   - Check AdGuard Home pod logs: `kubectl logs -n adguard-home -l app=adguard-home`
+   - Verify TLS configuration: `kubectl exec -it <adguard-pod> -n adguard-home -- curl http://localhost:80/control/tls/status`
+   - Check backup job status: `kubectl get jobs -n adguard-home`
+
+4. **Traefik Configuration**:
+   - Verify Traefik deployment: `kubectl get deployment traefik -n kube-system`
+   - Check Traefik logs: `kubectl logs -n kube-system -l app.kubernetes.io/name=traefik`
+   - Ensure Traefik service exposes required ports: `kubectl get svc traefik -n kube-system`

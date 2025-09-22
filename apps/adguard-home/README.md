@@ -1,6 +1,6 @@
 # AdGuard Home Backup and Restore Solution
 
-This project provides a complete backup and restore solution for AdGuard Home running in Kubernetes.
+This project provides a complete backup and restore solution for AdGuard Home running in Kubernetes, with support for DNS over HTTPS and DNS over TLS.
 
 ## Features
 
@@ -9,6 +9,7 @@ This project provides a complete backup and restore solution for AdGuard Home ru
 - **Secure**: Sensitive information is properly handled and stored using sealed secrets
 - **Complete Coverage**: All AdGuard Home configuration endpoints are backed up
 - **Easy Deployment**: Deployed using Kubernetes manifests and Kustomize
+- **DNS Security**: Supports DNS over HTTPS (DoH) and DNS over TLS (DoT) with proper certificate management
 
 ## Components
 
@@ -17,6 +18,7 @@ This project provides a complete backup and restore solution for AdGuard Home ru
 - **Custom Docker Image**: Contains all necessary tools (curl, git, jq)
 - **Sealed Secrets**: Securely stores sensitive information (Git credentials, admin password)
 - **ConfigMaps**: Contains backup and apply scripts
+- **TLS Configuration**: Automated TLS certificate management with cert-manager
 
 ## Prerequisites
 
@@ -39,6 +41,16 @@ The solution uses sealed secrets for sensitive information:
 - `adguard-home-admin-password`: AdGuard Home admin password
 - `ghcr-secret`: GHCR credentials for pulling custom Docker image
 
+## DNS Services
+
+The AdGuard Home setup provides multiple DNS services:
+
+1. **DNS over HTTPS (DoH)**: Available at `dns-adg.djasko.com` on port 443
+2. **DNS over TLS (DoT)**: Available at `dns-adg.djasko.com` on port 853
+3. **Web UI**: Accessible at `dns-adg-ui.djasko.com` with proper SSL termination
+
+All services are secured with Let's Encrypt certificates managed by cert-manager.
+
 ## Usage
 
 ### Trigger Backup Manually
@@ -59,6 +71,7 @@ kubectl patch job adguard-home-apply-config -n adguard-home -p '{"spec":{"suspen
 - Git credentials are stored as sealed secrets
 - AdGuard Home admin password is stored as a sealed secret
 - All API calls use proper authentication
+- TLS certificates are automatically managed and renewed by cert-manager
 
 ## Troubleshooting
 
@@ -81,6 +94,13 @@ kubectl logs -n adguard-home <pod-name>
 2. **Authentication Issues**: Verify that admin password is correctly set in sealed secrets
 3. **Git Operations Failures**: Check that Git credentials are correctly set in sealed secrets
 4. **Configuration Not Backed Up**: Verify that all configuration endpoints are accessible via API
+5. **DNS Resolution Issues**: 
+   - Check that Traefik is properly configured to expose ports 443 and 853
+   - Verify that IngressRouteTCP resources are correctly routing traffic
+   - Ensure certificates are properly issued and mounted
+6. **Certificate Issues**: 
+   - Check cert-manager logs: `kubectl logs -n cert-manager -l app=cert-manager`
+   - Verify certificate status: `kubectl get certificates -A`
 
 ## Contributing
 

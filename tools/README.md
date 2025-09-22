@@ -37,6 +37,15 @@ Comprehensive documentation available in `cert-manager-webhook-spaceship/docs/`:
 - ✅ ClusterIssuer: Ready and functional
 - ✅ Certificate: Successfully issued
 
+## DNS Services
+
+The cluster now provides secure DNS services through AdGuard Home with:
+- DNS over HTTPS (DoH) at `dns-adg.djasko.com`
+- DNS over TLS (DoT) at `dns-adg.djasko.com`
+- Web UI at `dns-adg-ui.djasko.com`
+
+All services are secured with Let's Encrypt certificates managed by cert-manager.
+
 ## Future Work
 
 ### cert-manager-webhook-spaceship

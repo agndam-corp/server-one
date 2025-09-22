@@ -67,6 +67,7 @@ spec:
         nodePort: 30553
     additionalArguments:
       - "--entryPoints.dot.address=:853/tcp"
+      - "--entryPoints.dot.proxyProtocol.insecure=true"
 EOF
       sudo mv /tmp/traefik-config.yaml /var/lib/rancher/k3s/server/manifests/traefik-config.yaml
       

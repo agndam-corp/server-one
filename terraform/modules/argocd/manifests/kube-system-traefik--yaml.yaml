@@ -1,11 +1,9 @@
-### KEEP AS REFERENCE BECAUSE IT WORKS, CHECK DoT AND PORTS:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
     meta.helm.sh/release-name: traefik
     meta.helm.sh/release-namespace: kube-system
-  generation: 9
   labels:
     app.kubernetes.io/instance: traefik-kube-system
     app.kubernetes.io/managed-by: Helm
@@ -49,6 +47,7 @@ spec:
         - --entryPoints.web.address=:8000/tcp
         - --entryPoints.websecure.address=:8443/tcp
         - --entryPoints.dot.address=:853/tcp
+        - --entryPoints.dot.proxyProtocol.insecure=true
         - --api.dashboard=true
         - --ping=true
         - --metrics.prometheus=true
