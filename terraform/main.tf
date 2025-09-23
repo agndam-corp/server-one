@@ -19,6 +19,10 @@ provider "kubectl" {
   config_path = fileexists("${var.kubeconfig_dir}/kubeconfig.yaml") ? "${var.kubeconfig_dir}/kubeconfig.yaml" : null
 }
 
+provider "aws" {
+  region = var.vpn_region
+}
+
 # Resource to clean up any existing K3s installation
 resource "null_resource" "cleanup_k3s" {
   triggers = {
@@ -332,4 +336,27 @@ module "argocd" {
   github_ssh_private_key_path  = var.github_ssh_private_key_path
   argocd_applications_repo_url = var.argocd_applications_repo_url
   argocd_applications_path     = var.argocd_applications_path
+}
+
+# Deploy VPN server
+module "vpn" {
+  source = "./modules/vpn"
+
+  region                    = var.vpn_region
+  instance_type             = var.vpn_instance_type
+  key_name                  = var.vpn_key_name
+  vpn_ca_cert_path          = var.vpn_ca_cert_path
+  vpn_ca_key_path           = var.vpn_ca_key_path
+  allowed_ssh_cidr_blocks   = var.vpn_allowed_ssh_cidr_blocks
+  allowed_vpn_cidr_blocks   = var.vpn_allowed_vpn_cidr_blocks
+  trust_anchor_arn          = var.vpn_trust_anchor_arn
+  create_trust_anchor       = var.vpn_create_trust_anchor
+  
+  # VPC configuration
+  create_vpc           = var.vpn_create_vpc
+  vpc_id               = var.vpn_vpc_id
+  subnet_id            = var.vpn_subnet_id
+  vpc_cidr             = var.vpn_vpc_cidr
+  subnet_cidr          = var.vpn_subnet_cidr
+  availability_zone    = var.vpn_availability_zone
 }

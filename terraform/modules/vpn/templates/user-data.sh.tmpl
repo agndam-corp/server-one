@@ -1,0 +1,83 @@
+#!/bin/bash
+
+# Check if this is the first boot
+if [ ! -f /etc/wireguard/.initialized ]; then
+  echo "First boot - initializing system..."
+  
+  # Update system (only on first boot)
+  yum update -y
+
+  # Install WireGuard (only on first boot)
+  amazon-linux-extras install epel -y
+  yum install -y wireguard-tools
+
+  # Install AWS CLI (only on first boot)
+  yum install -y awscli
+
+  # Install SSM agent for remote management (only on first boot)
+  yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+  
+  # Create WireGuard configuration directory
+  mkdir -p /etc/wireguard
+
+  # Create server private key (only on first boot)
+  wg genkey | tee /etc/wireguard/server_private.key | wg pubkey > /etc/wireguard/server_public.key
+
+  # Create WireGuard configuration (only on first boot)
+  cat > /etc/wireguard/wg0.conf << EOF
+[Interface]
+Address = 10.10.0.1/24
+SaveConfig = true
+PrivateKey = $(cat /etc/wireguard/server_private.key)
+ListenPort = 51820
+PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+EOF
+
+  # Set proper permissions
+  chmod 600 /etc/wireguard/server_private.key
+  chmod 644 /etc/wireguard/server_public.key
+  chmod 600 /etc/wireguard/wg0.conf
+
+  # Enable IP forwarding
+  echo 'net.ipv4.ip_forward = 1' >> /etc/sysctl.conf
+  sysctl -p
+
+  # Store CA certificate and key for IAM Roles Anywhere
+  mkdir -p /etc/iam-roles-anywhere
+  cat > /etc/iam-roles-anywhere/ca.crt << 'CA_CERT_EOF'
+${vpn_ca_cert}
+CA_CERT_EOF
+
+  cat > /etc/iam-roles-anywhere/ca.key << 'CA_KEY_EOF'
+${vpn_ca_key}
+CA_KEY_EOF
+
+  chmod 600 /etc/iam-roles-anywhere/ca.key
+  chmod 644 /etc/iam-roles-anywhere/ca.crt
+
+  # Configure iptables for VPN traffic
+  iptables -A INPUT -p udp --dport 51820 -j ACCEPT
+  iptables -A FORWARD -i wg0 -j ACCEPT
+  iptables -A FORWARD -o wg0 -j ACCEPT
+  iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+  # Save iptables rules
+  iptables-save > /etc/sysconfig/iptables
+
+  # Mark as initialized
+  touch /etc/wireguard/.initialized
+  echo "First boot initialization completed"
+else
+  echo "Subsequent boot - skipping initialization"
+fi
+
+# Start services on every boot
+systemctl start wg-quick@wg0
+systemctl start amazon-ssm-agent
+
+# Enable services to start automatically (in case of reboot)
+systemctl enable wg-quick@wg0
+systemctl enable amazon-ssm-agent
+
+echo "VPN server boot completed"
