@@ -210,8 +210,8 @@ kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $
 # VPN CA Certificate and Key Secret
 if [ -f "$VPN_CA_CERT_PATH" ] && [ -f "$VPN_CA_KEY_PATH" ]; then
   kubectl create secret generic vpn-ca-cert-key \
-    --from-file=ca.crt=$VPN_CA_CERT_PATH \
-    --from-file=ca.key=$VPN_CA_KEY_PATH \
+    --from-file=tls.crt=$VPN_CA_CERT_PATH \
+    --from-file=tls.key=$VPN_CA_KEY_PATH \
     --namespace cert-manager \
     --dry-run=client \
     -o yaml > $TEMP_DIR/vpn-ca-cert-key.yaml
