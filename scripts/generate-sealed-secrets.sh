@@ -76,6 +76,13 @@ echo "Enter CrowdSec Bouncer Key (leave empty to generate a random one):"
 read CROWDSEC_BOUNCER_KEY
 echo
 
+# VPN CA Certificate and Key
+echo "Enter path to VPN CA Certificate file:"
+read VPN_CA_CERT_PATH
+echo "Enter path to VPN CA Private Key file:"
+read VPN_CA_KEY_PATH
+echo
+
 # Create Kubernetes secrets in temporary directory
 echo "Creating Kubernetes secrets..."
 
@@ -177,6 +184,21 @@ fi
 
 # CrowdSec SealedSecret
 kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/crowdsec-secrets.yaml > /home/ubuntu/project/sealed-secrets/prd/crowdsec-secrets-sealed.yaml
+
+# VPN CA Certificate and Key Secret
+if [ -f "$VPN_CA_CERT_PATH" ] && [ -f "$VPN_CA_KEY_PATH" ]; then
+  kubectl create secret generic vpn-ca-cert-key \
+    --from-file=ca.crt=$VPN_CA_CERT_PATH \
+    --from-file=ca.key=$VPN_CA_KEY_PATH \
+    --namespace cert-manager \
+    --dry-run=client \
+    -o yaml > $TEMP_DIR/vpn-ca-cert-key.yaml
+
+  # VPN CA Certificate and Key SealedSecret
+  kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/vpn-ca-cert-key.yaml > /home/ubuntu/project/sealed-secrets/prd/vpn-ca-cert-key-sealed.yaml
+else
+  echo "Warning: VPN CA certificate or key file not found. Skipping VPN CA secret creation."
+fi
 
 # Clean up temporary files
 rm -rf $TEMP_DIR
