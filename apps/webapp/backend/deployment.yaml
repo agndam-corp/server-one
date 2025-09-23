@@ -7,6 +7,7 @@ metadata:
     app: webapp-backend
 spec:
   replicas: 1
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: webapp-backend

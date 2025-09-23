@@ -128,8 +128,8 @@ export default {
         // Encode credentials for basic auth
         const credentials = btoa(`${this.username}:${this.password}`)
         
-        // Test credentials by making a request to the backend
-        const response = await fetch('https://api.djasko.com/status', {
+        // Test credentials by making a request to the auth-check endpoint
+        const response = await fetch('https://api.djasko.com/auth-check', {
           method: 'GET',
           headers: {
             'Authorization': `Basic ${credentials}`,

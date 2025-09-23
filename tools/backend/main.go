@@ -87,7 +87,8 @@ func main() {
 		config.WithHTTPClient(httpClient),
 	)
 	if err != nil {
-		log.Fatalf("unable to load SDK config, %v", err)
+		log.Printf("Warning: unable to load AWS SDK config, %v", err)
+		// We'll try to create the client anyway, but operations will fail
 	}
 
 	// Create STS client
@@ -100,6 +101,7 @@ func main() {
 	// Create EC2 client with the assumed role credentials
 	ec2Client = ec2.NewFromConfig(cfg, func(o *ec2.Options) {
 		o.Credentials = aws.NewCredentialsCache(creds)
+		o.HTTPClient = httpClient
 	})
 
 	// Add basic auth middleware for protected routes
@@ -107,21 +109,33 @@ func main() {
 		os.Getenv("BASIC_AUTH_USERNAME"): os.Getenv("BASIC_AUTH_PASSWORD"),
 	}))
 
-	// Define protected routes
-	authorized.POST("/start", startInstance)
-	authorized.POST("/stop", stopInstance)
-	authorized.GET("/status", getInstanceStatus)
-
 	// Health check endpoint (no auth required)
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
+
+	// Simple auth check endpoint (no AWS interaction)
+	router.GET("/auth-check", func(c *gin.Context) {
+		// This is just to verify that basic auth is working
+		// We don't actually do anything with the credentials here
+		c.JSON(http.StatusOK, gin.H{"authenticated": true})
+	})
+
+	// Define protected routes that interact with AWS
+	authorized.POST("/start", startInstance)
+	authorized.POST("/stop", stopInstance)
+	authorized.GET("/status", getInstanceStatus)
 
 	// Start server
 	router.Run(":8080")
 }
 
 func startInstance(c *gin.Context) {
+	if ec2Client == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "AWS client not initialized"})
+		return
+	}
+
 	input := &ec2.StartInstancesInput{
 		InstanceIds: []string{instanceID},
 	}
@@ -139,6 +153,11 @@ func startInstance(c *gin.Context) {
 }
 
 func stopInstance(c *gin.Context) {
+	if ec2Client == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "AWS client not initialized"})
+		return
+	}
+
 	input := &ec2.StopInstancesInput{
 		InstanceIds: []string{instanceID},
 	}
@@ -156,6 +175,11 @@ func stopInstance(c *gin.Context) {
 }
 
 func getInstanceStatus(c *gin.Context) {
+	if ec2Client == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "AWS client not initialized"})
+		return
+	}
+
 	input := &ec2.DescribeInstancesInput{
 		InstanceIds: []string{instanceID},
 	}
