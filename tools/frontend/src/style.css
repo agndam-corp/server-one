@@ -45,6 +45,15 @@ body {
   transition: background-color 0.3s, color 0.3s;
 }
 
+/* Ensure full background coverage */
+.theme-dark {
+  background-color: var(--bg-primary);
+}
+
+.theme-light {
+  background-color: var(--bg-primary);
+}
+
 /* Update button styles to use theme variables */
 .bg-indigo-600 {
   background-color: var(--button-primary);

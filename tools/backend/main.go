@@ -21,6 +21,31 @@ var ec2Client *ec2.Client
 var instanceID string
 
 func main() {
+	// Set Gin to release mode
+	gin.SetMode(gin.ReleaseMode)
+
+	// Create router
+	router := gin.Default()
+
+	// Add CORS middleware for all routes
+	router.Use(func(c *gin.Context) {
+		origin := c.Request.Header.Get("Origin")
+		if origin == "https://djasko.com" || origin == "http://localhost:3000" {
+			c.Header("Access-Control-Allow-Origin", origin)
+		}
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-Requested-With")
+		c.Header("Access-Control-Allow-Credentials", "true")
+		c.Header("Access-Control-Max-Age", "86400")
+		
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+		
+		c.Next()
+	})
+
 	// Get the instance ID from environment variable
 	instanceID = os.Getenv("VPN_INSTANCE_ID")
 	if instanceID == "" {
@@ -77,36 +102,20 @@ func main() {
 		o.Credentials = aws.NewCredentialsCache(creds)
 	})
 
-	// Set Gin to release mode
-	gin.SetMode(gin.ReleaseMode)
-
-	// Create router
-	router := gin.Default()
-
-	// Add CORS middleware
-	router.Use(func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "https://djasko.com")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
-		c.Header("Access-Control-Allow-Credentials", "true")
-		
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
-			return
-		}
-		
-		c.Next()
-	})
-
-	// Add basic auth middleware
+	// Add basic auth middleware for protected routes
 	authorized := router.Group("/", gin.BasicAuth(gin.Accounts{
 		os.Getenv("BASIC_AUTH_USERNAME"): os.Getenv("BASIC_AUTH_PASSWORD"),
 	}))
 
-	// Define routes
+	// Define protected routes
 	authorized.POST("/start", startInstance)
 	authorized.POST("/stop", stopInstance)
 	authorized.GET("/status", getInstanceStatus)
+
+	// Health check endpoint (no auth required)
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
 
 	// Start server
 	router.Run(":8080")

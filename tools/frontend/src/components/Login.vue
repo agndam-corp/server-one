@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8" :class="themeClass">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
-      <h2 class="mt-6 text-center text-3xl font-extrabold">
+      <h2 class="mt-6 text-center text-3xl font-extrabold" :class="textClass">
         Sign in to Control Panel
       </h2>
     </div>
@@ -10,7 +10,7 @@
       <div class="py-8 px-4 shadow sm:rounded-lg sm:px-10" :class="cardClass">
         <form class="space-y-6" @submit.prevent="login">
           <div>
-            <label for="username" class="block text-sm font-medium">
+            <label for="username" class="block text-sm font-medium" :class="labelClass">
               Username
             </label>
             <div class="mt-1">
@@ -28,7 +28,7 @@
           </div>
 
           <div>
-            <label for="password" class="block text-sm font-medium">
+            <label for="password" class="block text-sm font-medium" :class="labelClass">
               Password
             </label>
             <div class="mt-1">
@@ -97,10 +97,16 @@ export default {
     cardClass() {
       return this.theme === 'dark' ? 'bg-gray-800' : 'bg-white'
     },
+    textClass() {
+      return this.theme === 'dark' ? 'text-white' : 'text-gray-900'
+    },
+    labelClass() {
+      return this.theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+    },
     inputClass() {
       return this.theme === 'dark' ? 
-        'bg-gray-700 border-gray-600 text-white' : 
-        'bg-white border-gray-300 text-gray-900'
+        'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 
+        'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
     },
     errorClass() {
       return this.theme === 'dark' ? 
@@ -179,5 +185,14 @@ export default {
   --button-primary-hover: #3182ce;
   --error-bg: #fed7d7;
   --error-text: #c53030;
+}
+
+/* Ensure full background coverage */
+.theme-dark {
+  background-color: var(--bg-primary);
+}
+
+.theme-light {
+  background-color: var(--bg-primary);
 }
 </style>

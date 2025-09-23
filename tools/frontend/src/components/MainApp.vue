@@ -168,10 +168,16 @@ export default {
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
 
-.shadow.overflow-hidden {
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
+.theme-dark .shadow.overflow-hidden {
+  background-color: #2d3748;
+  color: #f7fafc;
+  border: 1px solid #4a5568;
+}
+
+.theme-light .shadow.overflow-hidden {
+  background-color: #edf2f7;
+  color: #1a202c;
+  border: 1px solid #cbd5e0;
 }
 
 .shadow.overflow-hidden.sm\:rounded-lg {
@@ -179,50 +185,85 @@ export default {
 }
 
 .bg-green-100 {
-  background-color: var(--status-running);
+  background-color: #48bb78;
   opacity: 0.2;
 }
 
 .text-green-800 {
-  color: var(--status-running);
+  color: #48bb78;
 }
 
 .bg-red-100 {
-  background-color: var(--status-stopped);
+  background-color: #e53e3e;
   opacity: 0.2;
 }
 
 .text-red-800 {
-  color: var(--status-stopped);
+  color: #e53e3e;
 }
 
 .bg-yellow-100 {
-  background-color: var(--status-pending);
+  background-color: #ed8936;
   opacity: 0.2;
 }
 
 .text-yellow-800 {
-  color: var(--status-pending);
+  color: #ed8936;
 }
 
 .bg-green-600 {
-  background-color: var(--button-success);
+  background-color: #48bb78;
 }
 
 .bg-green-600:hover {
-  background-color: var(--button-success-hover);
+  background-color: #38a169;
 }
 
 .bg-red-600 {
-  background-color: var(--button-danger);
+  background-color: #e53e3e;
 }
 
 .bg-red-600:hover {
-  background-color: var(--button-danger-hover);
+  background-color: #c53030;
 }
 
 header {
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
+  background-color: var(--bg-secondary, #2d3748);
+  color: var(--text-primary, #f7fafc);
+}
+
+/* Theme variables */
+.theme-dark {
+  --bg-primary: #1a202c;
+  --bg-secondary: #2d3748;
+  --text-primary: #f7fafc;
+  --text-secondary: #e2e8f0;
+  --border-color: #4a5568;
+  --button-primary: #4299e1;
+  --button-primary-hover: #3182ce;
+  --button-danger: #e53e3e;
+  --button-danger-hover: #c53030;
+  --button-success: #48bb78;
+  --button-success-hover: #38a169;
+  --status-running: #48bb78;
+  --status-stopped: #e53e3e;
+  --status-pending: #ed8936;
+}
+
+.theme-light {
+  --bg-primary: #f7fafc;
+  --bg-secondary: #edf2f7;
+  --text-primary: #1a202c;
+  --text-secondary: #4a5568;
+  --border-color: #cbd5e0;
+  --button-primary: #4299e1;
+  --button-primary-hover: #3182ce;
+  --button-danger: #e53e3e;
+  --button-danger-hover: #c53030;
+  --button-success: #48bb78;
+  --button-success-hover: #38a169;
+  --status-running: #48bb78;
+  --status-stopped: #e53e3e;
+  --status-pending: #ed8936;
 }
 </style>

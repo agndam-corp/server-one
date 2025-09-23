@@ -91,4 +91,29 @@ body {
   color: var(--text-primary);
   transition: background-color 0.3s, color 0.3s;
 }
+
+/* Update button styles to use theme variables */
+.bg-indigo-600 {
+  background-color: var(--button-primary);
+}
+
+.bg-indigo-600:hover {
+  background-color: var(--button-primary-hover);
+}
+
+.bg-red-600 {
+  background-color: var(--button-danger);
+}
+
+.bg-red-600:hover {
+  background-color: var(--button-danger-hover);
+}
+
+.bg-green-600 {
+  background-color: var(--button-success);
+}
+
+.bg-green-600:hover {
+  background-color: var(--button-success-hover);
+}
 </style>
