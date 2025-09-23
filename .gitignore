@@ -30,3 +30,6 @@ cert-manager-webhook-spaceship.tar
 *.wtf/
 *.wtf
 secrets/
+
+# Ignore build
+node_modules
