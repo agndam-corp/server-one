@@ -3,8 +3,8 @@
 # Variables
 REGISTRY = ghcr.io
 USERNAME = damianjaskolski95
-IMAGE = $(REGISTRY)/$(USERNAME)/webapp-frontend
-TAG ?= v0.0.2
+IMAGE = $(REGISTRY)/$(USERNAME)/adguard-home-backup
+TAG ?= v1.0.0
 
 # Build target
 .PHONY: build

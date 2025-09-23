@@ -1,25 +1,42 @@
 <template>
-  <div class="min-h-screen bg-gray-100 flex flex-col">
-    <header class="bg-white shadow">
+  <div class="min-h-screen flex flex-col" :class="themeClass">
+    <header class="shadow">
       <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-gray-900">VPN Control Panel</h1>
-        <button 
-          @click="logout"
-          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-        >
-          Logout
-        </button>
+        <h1 class="text-3xl font-bold">VPN Control Panel</h1>
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center">
+            <span class="mr-2">Light</span>
+            <button 
+              @click="toggleTheme"
+              class="relative inline-flex h-6 w-11 items-center rounded-full"
+              :class="theme === 'dark' ? 'bg-indigo-600' : 'bg-gray-300'"
+            >
+              <span class="sr-only">Toggle theme</span>
+              <span 
+                class="inline-block h-4 w-4 transform rounded-full bg-white transition"
+                :class="theme === 'dark' ? 'translate-x-6' : 'translate-x-1'"
+              ></span>
+            </button>
+            <span class="ml-2">Dark</span>
+          </div>
+          <button 
+            @click="logout"
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          >
+            Logout
+          </button>
+        </div>
       </div>
     </header>
     <main class="flex-grow">
       <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div class="px-4 py-6 sm:px-0">
-          <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div class="shadow overflow-hidden sm:rounded-lg">
             <div class="px-4 py-5 sm:p-6">
-              <h2 class="text-lg leading-6 font-medium text-gray-900">VPN Instance Control</h2>
+              <h2 class="text-lg leading-6 font-medium">VPN Instance Control</h2>
               <div class="mt-4">
                 <div class="flex items-center">
-                  <span class="text-sm font-medium text-gray-500">Status:</span>
+                  <span class="text-sm font-medium">Status:</span>
                   <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full" 
                         :class="{
                           'bg-green-100 text-green-800': status === 'running',
@@ -46,7 +63,8 @@
                   </button>
                   <button 
                     @click="refreshStatus"
-                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    :class="theme === 'dark' ? 'text-white bg-gray-700 hover:bg-gray-600 border-gray-600' : 'text-gray-700 bg-white hover:bg-gray-50 border-gray-300'"
                   >
                     Refresh
                   </button>
@@ -70,11 +88,22 @@
 import axios from 'axios'
 
 export default {
+  props: {
+    theme: {
+      type: String,
+      default: 'dark'
+    }
+  },
   data() {
     return {
       status: 'unknown',
       message: '',
       messageType: 'success'
+    }
+  },
+  computed: {
+    themeClass() {
+      return `theme-${this.theme}`
     }
   },
   mounted() {
@@ -86,6 +115,10 @@ export default {
     this.refreshStatus()
   },
   methods: {
+    toggleTheme() {
+      const newTheme = this.theme === 'dark' ? 'light' : 'dark'
+      this.$emit('theme-changed', newTheme)
+    },
     async refreshStatus() {
       try {
         const response = await axios.get('https://api.djasko.com/status')
@@ -128,3 +161,68 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+/* Apply theme variables */
+.shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.shadow.overflow-hidden {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.shadow.overflow-hidden.sm\:rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.bg-green-100 {
+  background-color: var(--status-running);
+  opacity: 0.2;
+}
+
+.text-green-800 {
+  color: var(--status-running);
+}
+
+.bg-red-100 {
+  background-color: var(--status-stopped);
+  opacity: 0.2;
+}
+
+.text-red-800 {
+  color: var(--status-stopped);
+}
+
+.bg-yellow-100 {
+  background-color: var(--status-pending);
+  opacity: 0.2;
+}
+
+.text-yellow-800 {
+  color: var(--status-pending);
+}
+
+.bg-green-600 {
+  background-color: var(--button-success);
+}
+
+.bg-green-600:hover {
+  background-color: var(--button-success-hover);
+}
+
+.bg-red-600 {
+  background-color: var(--button-danger);
+}
+
+.bg-red-600:hover {
+  background-color: var(--button-danger-hover);
+}
+
+header {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+</style>

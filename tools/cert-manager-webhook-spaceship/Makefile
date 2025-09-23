@@ -3,7 +3,7 @@ OS ?= $(shell $(GO) env GOOS)
 ARCH ?= $(shell $(GO) env GOARCH)
 
 IMAGE_NAME := "cert-manager-webhook-spaceship"
-IMAGE_TAG := "latest"
+IMAGE_TAG := "v1.0.0"
 
 OUT := $(shell pwd)/_out
 

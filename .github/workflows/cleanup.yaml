@@ -1,0 +1,27 @@
+name: Cleanup GHCR Images
+
+on:
+  schedule:
+    - cron: "0 3 * * *" # every day at 3 AM
+  workflow_dispatch: # allow manual trigger
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - name: Cleanup GHCR images
+        uses: actions/delete-package-versions@v5
+        with:
+          package-type: container
+          # list all your package names separated by commas
+          package-name: |
+            webapp-frontend
+            webapp-backend
+            adguard-home-backup
+            cert-manager-webhook-spaceship
+          min-versions-to-keep: 3
+          delete-only-untagged-versions: false
