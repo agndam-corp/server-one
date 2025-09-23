@@ -83,6 +83,15 @@ echo "Enter path to VPN CA Private Key file:"
 read VPN_CA_KEY_PATH
 echo
 
+# Webapp Configuration
+echo "Enter the VPN Instance ID:"
+read VPN_INSTANCE_ID
+echo "Enter Webapp Basic Auth Username:"
+read WEBAPP_AUTH_USERNAME
+echo "Enter Webapp Basic Auth Password:"
+read -s WEBAPP_AUTH_PASSWORD
+echo
+
 # Create Kubernetes secrets in temporary directory
 echo "Creating Kubernetes secrets..."
 
@@ -113,6 +122,16 @@ kubectl create secret docker-registry ghcr-secret \
   --namespace adguard-home \
   --dry-run=client \
   -o yaml > $TEMP_DIR/ghcr-secret-adguard-home.yaml
+
+# GHCR Image Pull Secret for webapp namespace
+kubectl create secret docker-registry ghcr-secret \
+  --docker-server=ghcr.io \
+  --docker-username="$GHCR_USERNAME" \
+  --docker-password="$GHCR_TOKEN" \
+  --docker-email=noreply@github.com \
+  --namespace webapp \
+  --dry-run=client \
+  -o yaml > $TEMP_DIR/ghcr-secret-webapp.yaml
 
 # AdGuard Home Git Token Secret
 kubectl create secret generic adguard-home-git-token \
@@ -171,6 +190,9 @@ kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $
 # GHCR Image Pull SealedSecret for adguard-home namespace
 kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/ghcr-secret-adguard-home.yaml > /home/ubuntu/project/sealed-secrets/prd/ghcr-secret-adguard-home-sealed.yaml
 
+# GHCR Image Pull SealedSecret for webapp namespace
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/ghcr-secret-webapp.yaml > /home/ubuntu/project/sealed-secrets/prd/ghcr-secret-webapp-sealed.yaml
+
 # AdGuard Home Git Token SealedSecret
 kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/adguard-home-git-token.yaml > /home/ubuntu/project/sealed-secrets/prd/adguard-home-git-token-sealed.yaml
 
@@ -199,6 +221,24 @@ if [ -f "$VPN_CA_CERT_PATH" ] && [ -f "$VPN_CA_KEY_PATH" ]; then
 else
   echo "Warning: VPN CA certificate or key file not found. Skipping VPN CA secret creation."
 fi
+
+# Webapp Configuration Secrets
+kubectl create secret generic vpn-instance-config \\
+  --from-literal=instanceId="$VPN_INSTANCE_ID" \\
+  --namespace webapp \\
+  --dry-run=client \\
+  -o yaml > $TEMP_DIR/vpn-instance-config.yaml
+
+kubectl create secret generic webapp-auth \\
+  --from-literal=username="$WEBAPP_AUTH_USERNAME" \\
+  --from-literal=password="$WEBAPP_AUTH_PASSWORD" \\
+  --namespace webapp \\
+  --dry-run=client \\
+  -o yaml > $TEMP_DIR/webapp-auth.yaml
+
+# Webapp Configuration SealedSecrets
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/vpn-instance-config.yaml > /home/ubuntu/project/sealed-secrets/prd/vpn-instance-config-sealed.yaml
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/webapp-auth.yaml > /home/ubuntu/project/sealed-secrets/prd/webapp-auth-sealed.yaml
 
 # Clean up temporary files
 rm -rf $TEMP_DIR

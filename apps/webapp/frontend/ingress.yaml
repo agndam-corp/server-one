@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: webapp-frontend
+  namespace: webapp
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-production-spaceship
+spec:
+  tls:
+  - hosts:
+    - djasko.com
+    secretName: webapp-djasko-com-tls
+  rules:
+  - host: djasko.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: webapp-frontend
+            port:
+              number: 80

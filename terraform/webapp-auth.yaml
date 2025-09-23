@@ -1,0 +1,8 @@
+apiVersion: v1
+data:
+  password: QlE5ZFV6RmRqTTZxSHJ3cWE2SWVs
+  username: YWRtaW4=
+kind: Secret
+metadata:
+  name: webapp-auth
+  namespace: webapp

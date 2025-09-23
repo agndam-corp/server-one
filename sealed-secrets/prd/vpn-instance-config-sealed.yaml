@@ -1,0 +1,21 @@
+{
+  "kind": "SealedSecret",
+  "apiVersion": "bitnami.com/v1alpha1",
+  "metadata": {
+    "name": "vpn-instance-config",
+    "namespace": "webapp",
+    "creationTimestamp": null
+  },
+  "spec": {
+    "template": {
+      "metadata": {
+        "name": "vpn-instance-config",
+        "namespace": "webapp",
+        "creationTimestamp": null
+      }
+    },
+    "encryptedData": {
+      "instanceId": "AgABBex3UkGfkIhsG5OxtrtW479fvAOvelhFmOzhvUdnpHPxdG6A9lLRwSb2yOwBCbL53EFrZQkYybA8ohyrJvTzU49yZGyxfwE5DwjLp/UGQyUpkHBj3/AEK22Mgtv4p9HUor4m9O92x3QhgXr9UQgggGVJuPCNnta2vfKJvPyzCevK02IGxTCuhymIPV8GsETIRKPp4R29jFYXbPsJD7XfRar4Ecqojpp3SxFlb1WqdLGQ0bdbPZIcGsD3APWSDmjR2na3plSmKYhvcHSbCykSEPf/f+/sxS34+HGwYAq1fWnOK/vJQYuCTA2G5M2PbZH+JTT5WikAKmqECqBWnVDXJnWhBhb4N2ozxuziArCFbW0C1EpwLJjo+akTtmw/rLvZiEz1UFcgg0GvMUYrXLxN8m9x9FoCmwWYDSDPGITeuWZj1L2GJLqzsPrWkZnepEIw4NtFNo94FtiIqhrFn6dc/cr/ymYz9phJqsQD1egEZ2MURi+SS05GmRe62hIzhX/FV9kcQ9Hi6rmUM1bc4izEK3VVBUTZj8Hff5AsKCUBuDPCE2KDDx5L8xeYycyb7F5MgEMio4TI6Z9EWyNVqRD7GvOOZIuUAkvYaEYYR9WWMhIP1YfNA3+7YzX19BCOciTQARM2u5j3SmL1sxIHq/dS3m4G2bv7fOykUr5CfcAubu65dk9SiZKa2HvAio0rFnG8FDlHZFWSCvw="
+    }
+  }
+}

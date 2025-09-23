@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: webapp-frontend
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:DamianJaskolski95/k8s-server.git
+    path: apps/webapp/frontend
+    targetRevision: HEAD
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: webapp
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
