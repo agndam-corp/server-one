@@ -23,3 +23,7 @@ configMapGenerator:
 
 generatorOptions:
   disableNameSuffixHash: true
+
+images:
+- name: ghcr.io/damianjaskolski95/adguard-home-backup
+  newTag: v1.0.0
