@@ -4,7 +4,7 @@
 REGISTRY = ghcr.io
 USERNAME = damianjaskolski95
 IMAGE = $(REGISTRY)/$(USERNAME)/webapp-backend
-TAG ?= latest
+TAG ?= v0.0.1
 
 # Build target
 .PHONY: build

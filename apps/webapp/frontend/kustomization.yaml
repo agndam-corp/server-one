@@ -10,3 +10,7 @@ namespace: webapp
 
 commonLabels:
   app: webapp-frontend
+
+images:
+- name: ghcr.io/damianjaskolski95/webapp-frontend
+  newTag: v0.0.1
