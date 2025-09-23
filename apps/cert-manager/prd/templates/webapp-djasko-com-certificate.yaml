@@ -8,5 +8,7 @@ spec:
   issuerRef:
     name: letsencrypt-production-spaceship
     kind: ClusterIssuer
+  commonName: djasko.com
   dnsNames:
   - djasko.com
+  - www.djasko.com
