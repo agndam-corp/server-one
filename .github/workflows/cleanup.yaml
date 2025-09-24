@@ -2,7 +2,7 @@ name: Cleanup GHCR Images
 
 on:
   schedule:
-    - cron: "5 * * * *" # every day at 3 AM
+    - cron: "0 3 * * *" # every day at 3 AM
   workflow_dispatch: # allow manual trigger
 
 jobs:
