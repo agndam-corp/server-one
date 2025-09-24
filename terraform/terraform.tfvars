@@ -13,8 +13,8 @@ github_ssh_private_key_path = "../private/githubconnection"
 vpn_region                  = "us-east-1"
 vpn_instance_type           = "t3.micro"
 vpn_key_name                = "my-vpn-keypair"
-vpn_ca_cert_path            = "/home/ubuntu/project/private/agndam-root-ca.crt"
-vpn_ca_key_path             = "/home/ubuntu/project/private/agndam-root-ca.key"
+vpn_ca_cert_path            = "/home/ubuntu/webapp/project/private/agndam-root-ca.crt"
+vpn_ca_key_path             = "/home/ubuntu/webapp/project/private/agndam-root-ca.key"
 vpn_allowed_ssh_cidr_blocks = ["0.0.0.0/0"]
 vpn_allowed_vpn_cidr_blocks = ["0.0.0.0/0"]
 

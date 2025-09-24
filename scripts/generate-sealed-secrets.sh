@@ -182,30 +182,30 @@ kubectl create secret generic crowdsec-secrets \
 echo "Sealing secrets..."
 
 # Spaceship API Credentials SealedSecret
-kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/spaceship-api-key.yaml > /home/ubuntu/project/sealed-secrets/prd/spaceship-api-key-sealed.yaml
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/spaceship-api-key.yaml > /home/ubuntu/webapp/project/sealed-secrets/prd/spaceship-api-key-sealed.yaml
 
 # GHCR Image Pull SealedSecret
-kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/ghcr-secret.yaml > /home/ubuntu/project/sealed-secrets/prd/ghcr-secret-sealed.yaml
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/ghcr-secret.yaml > /home/ubuntu/webapp/project/sealed-secrets/prd/ghcr-secret-sealed.yaml
 
 # GHCR Image Pull SealedSecret for adguard-home namespace
-kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/ghcr-secret-adguard-home.yaml > /home/ubuntu/project/sealed-secrets/prd/ghcr-secret-adguard-home-sealed.yaml
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/ghcr-secret-adguard-home.yaml > /home/ubuntu/webapp/project/sealed-secrets/prd/ghcr-secret-adguard-home-sealed.yaml
 
 # GHCR Image Pull SealedSecret for webapp namespace
-kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/ghcr-secret-webapp.yaml > /home/ubuntu/project/sealed-secrets/prd/ghcr-secret-webapp-sealed.yaml
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/ghcr-secret-webapp.yaml > /home/ubuntu/webapp/project/sealed-secrets/prd/ghcr-secret-webapp-sealed.yaml
 
 # AdGuard Home Git Token SealedSecret
-kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/adguard-home-git-token.yaml > /home/ubuntu/project/sealed-secrets/prd/adguard-home-git-token-sealed.yaml
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/adguard-home-git-token.yaml > /home/ubuntu/webapp/project/sealed-secrets/prd/adguard-home-git-token-sealed.yaml
 
 # AdGuard Home Admin Password SealedSecret (for API authentication)
-kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/adguard-home-admin-password.yaml > /home/ubuntu/project/sealed-secrets/prd/adguard-home-admin-password-sealed.yaml
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/adguard-home-admin-password.yaml > /home/ubuntu/webapp/project/sealed-secrets/prd/adguard-home-admin-password-sealed.yaml
 
 # AdGuard Home Admin Password Hash SealedSecret (for config file - optional)
 if [ -f $TEMP_DIR/adguard-home-admin-password-hash.yaml ]; then
-  kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/adguard-home-admin-password-hash.yaml > /home/ubuntu/project/sealed-secrets/prd/adguard-home-admin-password-hash-sealed.yaml
+  kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/adguard-home-admin-password-hash.yaml > /home/ubuntu/webapp/project/sealed-secrets/prd/adguard-home-admin-password-hash-sealed.yaml
 fi
 
 # CrowdSec SealedSecret
-kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/crowdsec-secrets.yaml > /home/ubuntu/project/sealed-secrets/prd/crowdsec-secrets-sealed.yaml
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/crowdsec-secrets.yaml > /home/ubuntu/webapp/project/sealed-secrets/prd/crowdsec-secrets-sealed.yaml
 
 # VPN CA Certificate and Key Secret
 if [ -f "$VPN_CA_CERT_PATH" ] && [ -f "$VPN_CA_KEY_PATH" ]; then
@@ -217,7 +217,7 @@ if [ -f "$VPN_CA_CERT_PATH" ] && [ -f "$VPN_CA_KEY_PATH" ]; then
     -o yaml > $TEMP_DIR/vpn-ca-cert-key.yaml
 
   # VPN CA Certificate and Key SealedSecret
-  kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/vpn-ca-cert-key.yaml > /home/ubuntu/project/sealed-secrets/prd/vpn-ca-cert-key-sealed.yaml
+  kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/vpn-ca-cert-key.yaml > /home/ubuntu/webapp/project/sealed-secrets/prd/vpn-ca-cert-key-sealed.yaml
 else
   echo "Warning: VPN CA certificate or key file not found. Skipping VPN CA secret creation."
 fi
@@ -237,16 +237,16 @@ kubectl create secret generic webapp-auth \
   -o yaml > $TEMP_DIR/webapp-auth.yaml
 
 # Webapp Configuration SealedSecrets
-kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/vpn-instance-config.yaml > /home/ubuntu/project/sealed-secrets/prd/vpn-instance-config-sealed.yaml
-kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/webapp-auth.yaml > /home/ubuntu/project/sealed-secrets/prd/webapp-auth-sealed.yaml
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/vpn-instance-config.yaml > /home/ubuntu/webapp/project/sealed-secrets/prd/vpn-instance-config-sealed.yaml
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/webapp-auth.yaml > /home/ubuntu/webapp/project/sealed-secrets/prd/webapp-auth-sealed.yaml
 
 # Clean up temporary files
 rm -rf $TEMP_DIR
 
 echo "Sealed secrets created successfully!"
-echo "Files saved to /home/ubuntu/project/sealed-secrets/"
+echo "Files saved to /home/ubuntu/webapp/project/sealed-secrets/"
 echo
 echo "To apply the sealed secrets to your cluster, run:"
-echo "kubectl apply -f /home/ubuntu/project/sealed-secrets/"
+echo "kubectl apply -f /home/ubuntu/webapp/project/sealed-secrets/"
 echo
 echo "Please save these keys in a secure location."

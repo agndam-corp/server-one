@@ -30,7 +30,7 @@ This project provides a complete backup and restore solution for AdGuard Home ru
 ## Deployment
 
 ```bash
-kubectl apply -k /home/ubuntu/project/apps/adguard-home/prd
+kubectl apply -k /home/ubuntu/webapp/project/apps/adguard-home/prd
 ```
 
 ## Configuration

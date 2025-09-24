@@ -36,7 +36,7 @@ CrowdSec requires sensitive credentials:
 
 These secrets are managed using Sealed Secrets:
 1. Generate the secrets using the script: `/scripts/generate-sealed-secrets.sh`
-2. Apply the sealed secrets: `kubectl apply -f /home/ubuntu/project/sealed-secrets/prd/crowdsec-secrets-sealed.yaml`
+2. Apply the sealed secrets: `kubectl apply -f /home/ubuntu/webapp/project/sealed-secrets/prd/crowdsec-secrets-sealed.yaml`
 
 ## Handling Traefik Proxy Issue
 

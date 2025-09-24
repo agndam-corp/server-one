@@ -24,8 +24,8 @@ kubectl create secret docker-registry ghcr-secret \
   --docker-email=noreply@github.com \
   -n cert-manager \
   --dry-run=client \
-  -o yaml > /home/ubuntu/project/tools/cert-manager-webhook-spaceship/secrets/ghcr-secret.yaml
+  -o yaml > /home/ubuntu/webapp/project/tools/cert-manager-webhook-spaceship/secrets/ghcr-secret.yaml
 
-echo "Secret saved to /home/ubuntu/project/tools/cert-manager-webhook-spaceship/secrets/ghcr-secret.yaml"
+echo "Secret saved to /home/ubuntu/webapp/project/tools/cert-manager-webhook-spaceship/secrets/ghcr-secret.yaml"
 echo "To apply the secret to your cluster, run:"
-echo "kubectl apply -f /home/ubuntu/project/tools/cert-manager-webhook-spaceship/secrets/ghcr-secret.yaml"
+echo "kubectl apply -f /home/ubuntu/webapp/project/tools/cert-manager-webhook-spaceship/secrets/ghcr-secret.yaml"

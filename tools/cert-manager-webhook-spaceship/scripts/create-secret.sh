@@ -10,7 +10,7 @@ then
 fi
 
 # Check if secrets directory exists, create if not
-SECRETS_DIR="/home/ubuntu/project/tools/cert-manager-webhook-spaceship/secrets"
+SECRETS_DIR="/home/ubuntu/webapp/project/tools/cert-manager-webhook-spaceship/secrets"
 mkdir -p $SECRETS_DIR
 
 # Prompt for API credentials
