@@ -51,7 +51,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
-            type=ref=event=tag
+            type=ref,event=tag
             type=sha,format=short,prefix=
           # Get the tag from the kustomization.yaml file
           flavor: |
