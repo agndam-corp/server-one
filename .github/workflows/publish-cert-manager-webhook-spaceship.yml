@@ -6,10 +6,12 @@ on:
     tags: [ 'v*.*.*' ]
     paths:
       - 'tools/cert-manager-webhook-spaceship/**'
+      - '!tools/cert-manager-webhook-spaceship/deploy/cert-manager-webhook-spaceship/values.yaml'
   pull_request:
     branches: [ main ]
     paths:
       - 'tools/cert-manager-webhook-spaceship/**'
+      - '!tools/cert-manager-webhook-spaceship/deploy/cert-manager-webhook-spaceship/values.yaml'
   workflow_dispatch: # allow manual trigger
 
 env:
