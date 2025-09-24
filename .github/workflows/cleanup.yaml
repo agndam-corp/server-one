@@ -16,7 +16,9 @@ jobs:
       - name: Delete old package versions for web-frontend
         uses: actions/delete-package-versions@v5
         with:
-          package-names: 'web-frontend'
+          owner: agndam-corp
+          package-name: web-frontend
+          package-type: container
           min-versions-to-keep: 3
           delete-only-untagged-versions: false
           token: ${{ secrets.ADMIN_TOKEN }}
@@ -24,7 +26,9 @@ jobs:
       - name: Delete old package versions for web-backend
         uses: actions/delete-package-versions@v5
         with:
-          package-names: 'web-backend'
+          owner: agndam-corp
+          package-name: web-backend
+          package-type: container
           min-versions-to-keep: 3
           delete-only-untagged-versions: false
           token: ${{ secrets.ADMIN_TOKEN }}
@@ -32,7 +36,9 @@ jobs:
       - name: Delete old package versions for adguard-home-backup
         uses: actions/delete-package-versions@v5
         with:
-          package-names: 'adguard-home-backup'
+          owner: agndam-corp
+          package-name: adguard-home-backup
+          package-type: container
           min-versions-to-keep: 3
           delete-only-untagged-versions: false
           token: ${{ secrets.ADMIN_TOKEN }}
@@ -40,7 +46,9 @@ jobs:
       - name: Delete old package versions for cert-manager-webhook-spaceship
         uses: actions/delete-package-versions@v5
         with:
-          package-names: 'cert-manager-webhook-spaceship'
+          owner: agndam-corp
+          package-name: cert-manager-webhook-spaceship
+          package-type: container
           min-versions-to-keep: 3
           delete-only-untagged-versions: false
           token: ${{ secrets.ADMIN_TOKEN }}
