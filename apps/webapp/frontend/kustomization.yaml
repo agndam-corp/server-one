@@ -9,4 +9,4 @@ commonLabels:
   app: webapp-frontend
 images:
   - name: ghcr.io/damianjaskolski95/webapp-frontend
-    newTag: latest
+    newTag: 12bddee
