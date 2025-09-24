@@ -13,5 +13,5 @@ commonLabels:
   app: webapp-backend
 
 images:
-- name: ghcr.io/damianjaskolski95/webapp-backend
+- name: ghcr.io/agndam-corp/web-backend
   newTag: v0.0.3

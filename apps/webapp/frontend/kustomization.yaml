@@ -8,5 +8,5 @@ namespace: webapp
 commonLabels:
   app: webapp-frontend
 images:
-  - name: ghcr.io/damianjaskolski95/webapp-frontend
+  - name: ghcr.io/agndam-corp/web-frontend
     newTag: 12bddee
