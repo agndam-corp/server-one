@@ -1,7 +1,9 @@
-# Terraform backend configuration for local state storage
 terraform {
-  backend "local" {
-    # State file will be stored locally in terraform.tfstate
-    # in the same directory as this configuration.
+  backend "s3" {
+    bucket         = "terraform-state-djasko-com"
+    key            = "k3s-argocd/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-locks"
+    encrypt        = true
   }
 }

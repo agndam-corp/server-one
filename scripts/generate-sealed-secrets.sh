@@ -223,17 +223,17 @@ else
 fi
 
 # Webapp Configuration Secrets
-kubectl create secret generic vpn-instance-config \\
-  --from-literal=instanceId="$VPN_INSTANCE_ID" \\
-  --namespace webapp \\
-  --dry-run=client \\
+kubectl create secret generic vpn-instance-config \
+  --from-literal=instanceId="$VPN_INSTANCE_ID" \
+  --namespace webapp \
+  --dry-run=client \
   -o yaml > $TEMP_DIR/vpn-instance-config.yaml
 
-kubectl create secret generic webapp-auth \\
-  --from-literal=username="$WEBAPP_AUTH_USERNAME" \\
-  --from-literal=password="$WEBAPP_AUTH_PASSWORD" \\
-  --namespace webapp \\
-  --dry-run=client \\
+kubectl create secret generic webapp-auth \
+  --from-literal=username="$WEBAPP_AUTH_USERNAME" \
+  --from-literal=password="$WEBAPP_AUTH_PASSWORD" \
+  --namespace webapp \
+  --dry-run=client \
   -o yaml > $TEMP_DIR/webapp-auth.yaml
 
 # Webapp Configuration SealedSecrets
