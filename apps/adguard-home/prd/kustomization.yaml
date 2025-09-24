@@ -25,5 +25,5 @@ generatorOptions:
   disableNameSuffixHash: true
 
 images:
-- name: ghcr.io/damianjaskolski95/adguard-home-backup
+- name: ghcr.io/agndam-corp/adguard-home-backup
   newTag: v1.0.0

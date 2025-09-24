@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/damianjaskolski95/cert-manager-webhook-spaceship
+  repository: ghcr.io/agndam-corp/cert-manager-webhook-spaceship
   tag: v1.0.0
   pullPolicy: Always
 
