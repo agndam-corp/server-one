@@ -21,7 +21,7 @@ variable "github_ssh_private_key_path" {
 variable "argocd_applications_repo_url" {
   description = "The Git repository URL for ArgoCD applications"
   type        = string
-  default     = "git@github.com:DamianJaskolski95/k8s-server.git"
+  default     = "git@github.com:agndam-corp/server-one.git"
 }
 
 variable "argocd_applications_path" {

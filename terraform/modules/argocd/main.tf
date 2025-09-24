@@ -53,7 +53,7 @@ resource "kubernetes_secret" "argocd_repo_secret" {
 
   data = {
     type          = "git"
-    url           = "git@github.com:DamianJaskolski95/k8s-server.git"
+    url           = "git@github.com:agndam-corp/server-one.git"
     sshPrivateKey = file(var.github_ssh_private_key_path)
   }
 
