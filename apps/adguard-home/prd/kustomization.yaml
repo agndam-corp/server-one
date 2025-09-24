@@ -26,4 +26,4 @@ generatorOptions:
 
 images:
 - name: ghcr.io/agndam-corp/adguard-home-backup
-  newTag: v1.0.0
+  newTag: e0d9027
