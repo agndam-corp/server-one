@@ -1,7 +1,0 @@
-apiVersion: v1
-data:
-  instanceId: cGxhY2Vob2xk
-kind: Secret
-metadata:
-  name: vpn-instance-config
-  namespace: webapp

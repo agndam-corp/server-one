@@ -86,10 +86,21 @@ echo
 # Webapp Configuration
 echo "Enter the VPN Instance ID:"
 read VPN_INSTANCE_ID
-echo "Enter Webapp Basic Auth Username:"
-read WEBAPP_AUTH_USERNAME
-echo "Enter Webapp Basic Auth Password:"
-read -s WEBAPP_AUTH_PASSWORD
+# echo "Enter Webapp Basic Auth Username:"
+# read WEBAPP_AUTH_USERNAME
+# echo "Enter Webapp Basic Auth Password:"
+# read -s WEBAPP_AUTH_PASSWORD
+echo
+
+# Webapp JWT Authentication Configuration
+echo "Enter Webapp Admin Password (for JWT auth):"
+read -s WEBAPP_ADMIN_PASSWORD
+echo
+echo "Enter Webapp Operator Password (for JWT auth):"
+read -s WEBAPP_OPERATOR_PASSWORD
+echo
+echo "Enter JWT Secret (leave empty to generate a random one):"
+read JWT_SECRET_INPUT
 echo
 
 # Create Kubernetes secrets in temporary directory
@@ -222,6 +233,12 @@ else
   echo "Warning: VPN CA certificate or key file not found. Skipping VPN CA secret creation."
 fi
 
+# Generate random JWT secret if not provided
+if [ -z "$JWT_SECRET_INPUT" ]; then
+  JWT_SECRET_INPUT=$(openssl rand -base64 32)
+  echo "Generated JWT Secret: $JWT_SECRET_INPUT"
+fi
+
 # Webapp Configuration Secrets
 kubectl create secret generic vpn-instance-config \
   --from-literal=instanceId="$VPN_INSTANCE_ID" \
@@ -229,16 +246,26 @@ kubectl create secret generic vpn-instance-config \
   --dry-run=client \
   -o yaml > $TEMP_DIR/vpn-instance-config.yaml
 
-kubectl create secret generic webapp-auth \
-  --from-literal=username="$WEBAPP_AUTH_USERNAME" \
-  --from-literal=password="$WEBAPP_AUTH_PASSWORD" \
+# kubectl create secret generic webapp-auth \
+#   --from-literal=username="$WEBAPP_AUTH_USERNAME" \
+#   --from-literal=password="$WEBAPP_AUTH_PASSWORD" \
+#   --namespace webapp \
+#   --dry-run=client \
+#   -o yaml > $TEMP_DIR/webapp-auth.yaml
+
+# Webapp JWT Authentication Secret
+kubectl create secret generic webapp-auth-jwt \
+  --from-literal=admin_password="$WEBAPP_ADMIN_PASSWORD" \
+  --from-literal=operator_password="$WEBAPP_OPERATOR_PASSWORD" \
+  --from-literal=jwt_secret="$JWT_SECRET_INPUT" \
   --namespace webapp \
   --dry-run=client \
-  -o yaml > $TEMP_DIR/webapp-auth.yaml
+  -o yaml > $TEMP_DIR/webapp-auth-jwt.yaml
 
 # Webapp Configuration SealedSecrets
 kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/vpn-instance-config.yaml > /home/ubuntu/webapp/project/sealed-secrets/prd/vpn-instance-config-sealed.yaml
-kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/webapp-auth.yaml > /home/ubuntu/webapp/project/sealed-secrets/prd/webapp-auth-sealed.yaml
+# kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/webapp-auth.yaml > /home/ubuntu/webapp/project/sealed-secrets/prd/webapp-auth-sealed.yaml
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/webapp-auth-jwt.yaml > /home/ubuntu/webapp/project/sealed-secrets/prd/webapp-auth-jwt-sealed.yaml
 
 # Clean up temporary files
 rm -rf $TEMP_DIR
@@ -250,3 +277,5 @@ echo "To apply the sealed secrets to your cluster, run:"
 echo "kubectl apply -f /home/ubuntu/webapp/project/sealed-secrets/"
 echo
 echo "Please save these keys in a secure location."
+echo
+echo "Note: The webapp-auth-jwt-sealed.yaml contains the JWT authentication secrets for admin/operator users."

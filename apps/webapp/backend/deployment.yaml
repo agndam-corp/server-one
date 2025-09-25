@@ -29,16 +29,21 @@ spec:
             secretKeyRef:
               name: vpn-instance-config
               key: instanceId
-        - name: BASIC_AUTH_USERNAME
+        - name: ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: webapp-auth
-              key: username
-        - name: BASIC_AUTH_PASSWORD
+              name: webapp-auth-jwt
+              key: admin_password
+        - name: OPERATOR_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: webapp-auth
-              key: password
+              name: webapp-auth-jwt
+              key: operator_password
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: webapp-auth-jwt
+              key: jwt_secret
         - name: AWS_REGION
           value: "us-east-1"
         volumeMounts:
