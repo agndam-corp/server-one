@@ -4,8 +4,8 @@ metadata:
   name: webapp-db-init-cron
   namespace: webapp
 spec:
-  schedule: "0 0 * * *"   # dummy schedule; won’t run because suspend=true
-  suspend: true           # prevent automatic execution
+  schedule: "0 0 * * *"
+  suspend: true
   jobTemplate:
     spec:
       template:
@@ -13,22 +13,45 @@ spec:
           restartPolicy: OnFailure
           containers:
           - name: db-init
-            image: mysql:8.0
+            image: bitnami/mariadb-client:11
             command:
             - sh
             - -c
             - |
-              until mysql -h webapp-mariadb.webapp.svc.cluster.local -u webapp-user -e "SELECT 1;" &> /dev/null; do
+              until mysql -h webapp-mariadb.webapp.svc.cluster.local -u webapp-user -p"$MYSQL_PWD" -e "SELECT 1;" &> /dev/null; do
                 echo "Waiting for MariaDB..."
                 sleep 3
               done
-              mysql -h webapp-mariadb.webapp.svc.cluster.local -u webapp-user webapp-db < /init/init.sql
+
+              echo "Initializing database tables..."
+              mysql -h webapp-mariadb.webapp.svc.cluster.local -u webapp-user -p"$MYSQL_PWD" webapp_db < /init/init.sql
+
+              echo "Creating initial users..."
+              mysql -h webapp-mariadb.webapp.svc.cluster.local -u webapp-user -p"$MYSQL_PWD" webapp_db <<EOF
+              INSERT INTO users (username, email, password_hash)
+              SELECT 'admin', 'admin@example.com', '$ADMIN_PASSWORD'
+              WHERE NOT EXISTS (SELECT 1 FROM users WHERE username='admin');
+
+              INSERT INTO users (username, email, password_hash)
+              SELECT 'operator', 'operator@example.com', '$OPERATOR_PASSWORD'
+              WHERE NOT EXISTS (SELECT 1 FROM users WHERE username='operator');
+              EOF
             env:
             - name: MYSQL_PWD
               valueFrom:
                 secretKeyRef:
                   name: mariadb-webapp-password
                   key: password
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: webapp-auth-jwt
+                  key: admin_password
+            - name: OPERATOR_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: webapp-auth-jwt
+                  key: operator_password
             volumeMounts:
             - name: init-sql
               mountPath: /init
