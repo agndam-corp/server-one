@@ -20,7 +20,7 @@ spec:
       - name: ghcr-secret
       containers:
       - name: webapp-backend
-        image: ghcr.io/agndam-corp/webapp-backend:latest  # Updated image name
+        image: ghcr.io/agndam-corp/web-backend:latest  # Updated image name
         ports:
         - containerPort: 8080
         env:
