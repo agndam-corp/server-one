@@ -3,7 +3,7 @@ apiVersion: k8s.mariadb.com/v1alpha1
 kind: MariaDB
 metadata:
   name: webapp-mariadb
-  namespace: {{ .Release.Namespace | default "webapp" }}
+  namespace: {{ .Values.mariadb.namespace | default "webapp" }}
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
