@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: git@github.com:agndam-corp/server-one.git
     targetRevision: HEAD
-    path: project/apps/mariadb/prd
+    path: apps/mariadb/prd
     helm:
       valueFiles:
         - values.yaml
