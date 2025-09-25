@@ -1,0 +1,73 @@
+{{- if .Values.mariadb.enabled }}
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: Database
+metadata:
+  name: webapp-users-db
+  namespace: {{ .Release.Namespace | default "webapp" }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  mariaDbRef:
+    name: webapp-mariadb
+  characterSet: utf8
+  collate: utf8_general_ci
+---
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: User
+metadata:
+  name: webapp-users-user
+  namespace: {{ .Release.Namespace | default "webapp" }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  mariaDbRef:
+    name: webapp-mariadb
+  passwordSecretKeyRef:
+    name: mariadb-webapp-password
+    key: password
+  host: "%"
+---
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: Grant
+metadata:
+  name: webapp-users-grant
+  namespace: {{ .Release.Namespace | default "webapp" }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  mariaDbRef:
+    name: webapp-mariadb
+  privileges:
+    - "ALL"
+  database: {{ .Values.mariadb.database | default "webapp_db" }}
+  table: "*"
+  user: webapp-users-user
+  host: "%"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webapp-db-init
+  namespace: {{ .Release.Namespace | default "webapp" }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+data:
+  init.sql: |
+    CREATE TABLE IF NOT EXISTS users (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      username VARCHAR(255) NOT NULL UNIQUE,
+      email VARCHAR(255) NOT NULL UNIQUE,
+      password_hash VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
+    
+    CREATE TABLE IF NOT EXISTS sessions (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NOT NULL,
+      token VARCHAR(255) NOT NULL UNIQUE,
+      expires_at TIMESTAMP NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+{{- end }}

@@ -1,0 +1,83 @@
+{{- if .Values.mariadb.enabled }}
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: MariaDB
+metadata:
+  name: webapp-mariadb
+  namespace: {{ .Release.Namespace | default "webapp" }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  # Database configuration
+  database: {{ .Values.mariadb.database | default "webapp_db" }}
+  username: {{ .Values.mariadb.username | default "webapp_user" }}
+  passwordSecretKeyRef:
+    name: mariadb-webapp-password
+    key: password
+  rootPasswordSecretKeyRef:
+    name: mariadb-root-password
+    key: password
+  
+  # Pod configuration
+  image: {{ .Values.mariadb.image | default "mariadb:11.4.3" }}
+  imagePullPolicy: IfNotPresent
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    ports:
+      - name: mysql
+        port: 3306
+        protocol: TCP
+        targetPort: 3306
+  
+  # Storage configuration
+  storage:
+    size: {{ .Values.mariadb.storage.size | default "10Gi" }}
+    storageClassName: ""
+    accessModes:
+      - ReadWriteOnce
+  
+  # Pod affinity and resources
+  podSecurityContext:
+    fsGroup: 999
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 999
+    runAsGroup: 999
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+  
+  # Resources
+  {{- if .Values.mariadb.resources }}
+  resources:
+    {{- if .Values.mariadb.resources.requests }}
+    requests:
+      {{- if .Values.mariadb.resources.requests.memory }}
+      memory: {{ .Values.mariadb.resources.requests.memory }}
+      {{- end }}
+      {{- if .Values.mariadb.resources.requests.cpu }}
+      cpu: {{ .Values.mariadb.resources.requests.cpu }}
+      {{- end }}
+    {{- end }}
+    {{- if .Values.mariadb.resources.limits }}
+    limits:
+      {{- if .Values.mariadb.resources.limits.memory }}
+      memory: {{ .Values.mariadb.resources.limits.memory }}
+      {{- end }}
+      {{- if .Values.mariadb.resources.limits.cpu }}
+      cpu: {{ .Values.mariadb.resources.limits.cpu }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  
+  # Replication (disabled for single instance)
+  replicas: 1
+  replication:
+    enabled: false
+  
+  # Metrics (optional)
+  metrics:
+    enabled: false
+{{- end }}

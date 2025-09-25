@@ -1,0 +1,47 @@
+# Default values for mariadb operator
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+mariadb-operator:
+  crds:
+    enabled: true
+  metrics:
+    enabled: false
+
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  # Configuration for the controller
+  controller:
+    replicas: 1
+
+  # Service Account configuration
+  serviceAccount:
+    create: true
+
+# MariaDB instance configuration
+mariadb:
+  enabled: true
+  image: mariadb:11.4.3
+  database: webapp_db
+  username: webapp_user
+  storage:
+    size: 1Gi
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 250m
+    limits:
+      memory: 256Gi
+      cpu: 500m

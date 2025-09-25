@@ -1,0 +1,170 @@
+# Default values for mariadb operator 25.8.4
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mariadb-operator/mariadb-operator/main/charts/mariadb-operator/values.schema.json
+
+image:
+  repository: ghcr.io/mariadb-operator/mariadb-operator
+  tag: 25.8.4
+  pullPolicy: IfNotPresent
+
+# Name of the service account to use.
+# If not set and createServiceAccount is true, a name is generated using the fullname template
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Specifies whether RBAC resources should be created
+rbac:
+  create: true
+
+# Specifies whether PSP resources should be created (deprecated)
+podSecurityPolicy:
+  create: false
+
+# Cluster name to use when creating additional resources
+clusterName: ""
+
+# Additional arguments to pass to mariadb-operator
+args: []
+
+# Additional environment variables to pass to mariadb-operator
+env: []
+
+# If true, the operator will create Prometheus metrics
+metrics:
+  enabled: false
+  service:
+    annotations: {}
+    labels: {}
+    port: 8080
+    type: ClusterIP
+  serviceMonitor:
+    enabled: false
+    additionalLabels: {}
+    annotations: {}
+    interval: 30s
+    scrapeTimeout: 10s
+  prometheusRule:
+    enabled: false
+    additionalLabels: {}
+    namespace: ""
+    rules: []
+
+# Resource limits and requests for the operator
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Node labels for pod assignment
+nodeSelector: {}
+
+# Annotations to be added to the operator deployment
+podAnnotations: {}
+
+# Labels to be added to the operator deployment
+podLabels: {}
+
+# Security context for the operator pod
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 999
+  fsGroup: 999
+
+# Security context for the operator container
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 999
+  capabilities:
+    drop:
+      - ALL
+
+# Tolerations for pod assignment
+tolerations: []
+
+# Affinity for pod assignment
+affinity: {}
+
+# Priority class name for the operator pod
+priorityClassName: ""
+
+# Topology spread constraints for pod assignment
+topologySpreadConstraints: []
+
+# Additional volumes to mount in the operator pod
+volumes: []
+
+# Additional volume mounts in the operator container
+volumeMounts: []
+
+# Deployment strategy for the operator
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 1
+
+# Number of replicas for the operator
+replicaCount: 1
+
+# Leader election configuration
+leaderElection:
+  enabled: true
+  id: mariadb-operator-leader-election
+  resourceName: mariadb-operator-leader-election
+
+# Configuration for the controller
+controller:
+  # Max concurrent reconciles for the controller
+  maxConcurrentReconciles: 1
+  # Metrics configuration for the controller
+  metrics:
+    port: 8080
+  # Health configuration for the controller
+  health:
+    port: 9440
+
+# Configuration for the webhook server
+webhook:
+  enabled: true
+  port: 9443
+  certDir: /tmp/k8s-webhook-server/serving-certs
+  # TLS certificate configuration
+  tls:
+    certName: tls.crt
+    keyName: tls.key
+    # How long before certificate expiration should they be renewed
+    rotationThreshold: 24h
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 443
+  targetPort: 9443
+  annotations: {}
+  labels: {}
+
+# Service account configuration
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Pod disruption budget configuration
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+  # maxUnavailable: 1
+
+# Horizontal pod autoscaling configuration
+horizontalPodAutoscaler:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80

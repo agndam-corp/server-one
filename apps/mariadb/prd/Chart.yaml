@@ -1,0 +1,9 @@
+apiVersion: v2
+name: mariadb
+version: 0.1.0
+appVersion: "1.0"
+description: MariaDB for Kubernetes - Database for Webapp Users
+dependencies:
+  - name: mariadb-operator
+    version: 25.8.4
+    repository: https://mariadb-operator.github.io/mariadb-operator
