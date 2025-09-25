@@ -7,8 +7,6 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
-  # Database configuration
-  database: {{ .Values.mariadb.database | default "webapp_db" }}
   username: {{ .Values.mariadb.username | default "webapp_user" }}
   passwordSecretKeyRef:
     name: mariadb-webapp-password
@@ -16,21 +14,17 @@ spec:
   rootPasswordSecretKeyRef:
     name: mariadb-root-password
     key: password
-  
-  # Pod configuration
+
   image: {{ .Values.mariadb.image | default "mariadb:11.4.3" }}
   imagePullPolicy: IfNotPresent
-  
-  # Service configuration
+
   service:
     type: ClusterIP
-  
-  # Storage configuration
+
   storage:
     size: {{ .Values.mariadb.storage.size | default "10Gi" }}
     storageClassName: ""
-  
-  # Pod affinity and resources
+
   podSecurityContext:
     fsGroup: 999
   securityContext:
@@ -41,8 +35,7 @@ spec:
     capabilities:
       drop:
         - ALL
-  
-  # Resources
+
   {{- if .Values.mariadb.resources }}
   resources:
     {{- if .Values.mariadb.resources.requests }}
@@ -64,13 +57,11 @@ spec:
       {{- end }}
     {{- end }}
   {{- end }}
-  
-  # Replication (disabled for single instance)
+
   replicas: 1
   replication:
     enabled: false
-  
-  # Metrics (optional)
+
   metrics:
     enabled: false
 {{- end }}

@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: webapp-db-init-job
+  namespace: webapp
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: db-init
+        image: mariadb:11.4
+        command:
+        - sh
+        - -c
+        - |
+          until mysqladmin ping -h webapp-mariadb -u webapp_user --silent; do
+            echo "Waiting for MariaDB..."
+            sleep 3
+          done
+          mysql -h webapp-mariadb -u webapp_user webapp_db < /init/init.sql
+        env:
+        - name: MYSQL_PWD
+          valueFrom:
+            secretKeyRef:
+              name: mariadb-webapp-password
+              key: password
+        volumeMounts:
+        - name: init-sql
+          mountPath: /init
+      volumes:
+      - name: init-sql
+        configMap:
+          name: webapp-db-init
