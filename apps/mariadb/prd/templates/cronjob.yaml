@@ -4,8 +4,8 @@ metadata:
   name: webapp-db-init-cron
   namespace: webapp
 spec:
-  schedule: "0 0 * * *"
-  suspend: true
+  schedule: "0 0 * * *"   # dummy schedule; won’t run because suspend=true
+  suspend: true           # prevent automatic execution
   jobTemplate:
     spec:
       template:
@@ -18,29 +18,17 @@ spec:
             - sh
             - -c
             - |
-              until mysql -h webapp-mariadb.webapp.svc.cluster.local -u webapp-user -p"$MYSQL_PWD" -e "SELECT 1;" &> /dev/null; do
+              until mysql -h webapp-mariadb.webapp.svc.cluster.local -u webapp-user -e "SELECT 1;" &> /dev/null; do
                 echo "Waiting for MariaDB..."
                 sleep 3
               done
-
-              echo "Initializing database tables..."
-              mysql -h webapp-mariadb.webapp.svc.cluster.local -u webapp-user -p"$MYSQL_PWD" webapp_db < /init/init.sql
+              mysql -h webapp-mariadb.webapp.svc.cluster.local -u webapp-user webapp-db < /init/init.sql
             env:
             - name: MYSQL_PWD
               valueFrom:
                 secretKeyRef:
                   name: mariadb-webapp-password
                   key: password
-            - name: ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: webapp-auth-jwt
-                  key: admin_password
-            - name: OPERATOR_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: webapp-auth-jwt
-                  key: operator_password
             volumeMounts:
             - name: init-sql
               mountPath: /init
