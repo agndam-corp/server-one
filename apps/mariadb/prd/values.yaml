@@ -33,8 +33,8 @@ mariadb:
   enabled: true
   image: mariadb:11.4.3
   namespace: webapp
-  database: webapp_db
-  username: webapp_user
+  database: webapp-db
+  username: webapp-user
   storage:
     size: 1Gi
   resources:

@@ -14,11 +14,11 @@
 #         - sh
 #         - -c
 #         - |
-#           until mysqladmin ping -h webapp-mariadb -u webapp_user --silent; do
+#           until mysqladmin ping -h webapp-mariadb -u webapp-user --silent; do
 #             echo "Waiting for MariaDB..."
 #             sleep 3
 #           done
-#           mysql -h webapp-mariadb -u webapp_user webapp_db < /init/init.sql
+#           mysql -h webapp-mariadb -u webapp-user webapp-db < /init/init.sql
 #         env:
 #         - name: MYSQL_PWD
 #           valueFrom:

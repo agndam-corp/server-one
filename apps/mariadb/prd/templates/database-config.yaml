@@ -9,7 +9,7 @@ metadata:
 spec:
   mariaDbRef:
     name: webapp-mariadb
-  databaseName: webapp_db
+  databaseName: webapp-db
   characterSet: utf8
   collate: utf8_general_ci
 ---
@@ -25,9 +25,9 @@ spec:
     name: webapp-mariadb
   privileges:
     - "ALL"
-  database: webapp_db
+  database: webapp-db
   table: "*"
-  username: webapp_user
+  username: webapp-user
   host: "%"
 ---
 apiVersion: v1
