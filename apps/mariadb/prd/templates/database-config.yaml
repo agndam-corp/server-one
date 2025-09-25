@@ -68,4 +68,12 @@ data:
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
+    
+    -- Insert default admin and operator users
+    -- These will only be inserted if they don't already exist
+    -- htpasswd -B -n <username>
+    -- INSERT IGNORE INTO users (username, email, password_hash) VALUES 
+    -- ('admin', 'admin@djasko.com', '<bcrypt password>'); -- Default password hash placeholder
+    -- INSERT IGNORE INTO users (username, email, password_hash) VALUES 
+    -- ('operator', 'operator@djasko.com', '<bcrypt password>'); -- Default password hash placeholder
 {{- end }}

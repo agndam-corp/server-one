@@ -34,7 +34,7 @@ mariadb:
   image: mariadb:11.4.3
   namespace: webapp
   database: webapp-db
-  username: webapp_user
+  username: webapp-user
   storage:
     size: 1Gi
   resources:

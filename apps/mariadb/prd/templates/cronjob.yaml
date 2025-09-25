@@ -25,17 +25,6 @@ spec:
 
               echo "Initializing database tables..."
               mysql -h webapp-mariadb.webapp.svc.cluster.local -u webapp-user -p"$MYSQL_PWD" webapp_db < /init/init.sql
-
-              echo "Creating initial users..."
-              mysql -h webapp-mariadb.webapp.svc.cluster.local -u webapp-user -p"$MYSQL_PWD" webapp_db <<EOF
-              INSERT INTO users (username, email, password_hash)
-              SELECT 'admin', 'admin@example.com', '$ADMIN_PASSWORD'
-              WHERE NOT EXISTS (SELECT 1 FROM users WHERE username='admin');
-
-              INSERT INTO users (username, email, password_hash)
-              SELECT 'operator', 'operator@example.com', '$OPERATOR_PASSWORD'
-              WHERE NOT EXISTS (SELECT 1 FROM users WHERE username='operator');
-              EOF
             env:
             - name: MYSQL_PWD
               valueFrom:
