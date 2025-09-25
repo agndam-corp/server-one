@@ -80,4 +80,9 @@ spec:
   # Metrics (optional)
   metrics:
     enabled: false
+  
+  # Pod Labels to match the service
+  podLabels:
+    app.kubernetes.io/name: mariadb
+    app.kubernetes.io/instance: webapp-mariadb
 {{- end }}

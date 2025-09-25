@@ -41,7 +41,7 @@ spec:
     - "ALL"
   database: {{ .Values.mariadb.database | default "webapp_db" }}
   table: "*"
-  user: webapp-users-user
+  username: webapp-users-user
   host: "%"
 ---
 apiVersion: v1

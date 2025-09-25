@@ -3,8 +3,6 @@
 # Declare variables to be passed into your templates.
 
 mariadb-operator:
-  crds:
-    enabled: true
   metrics:
     enabled: false
 
