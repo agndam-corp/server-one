@@ -9,7 +9,6 @@ metadata:
 spec:
   mariaDbRef:
     name: webapp-mariadb
-  databaseName: webapp-db
   characterSet: utf8
   collate: utf8_general_ci
 ---
