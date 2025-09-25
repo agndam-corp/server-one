@@ -7,7 +7,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
-  username: {{ .Values.mariadb.username | default "webapp-user" }}
+  username: {{ .Values.mariadb.username | default "webapp_user" }}
   passwordSecretKeyRef:
     name: mariadb-webapp-password
     key: password

@@ -16,7 +16,7 @@ spec:
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: Grant
 metadata:
-  name: webapp-users-grant
+  name: webapp_users-grant
   namespace: {{ .Values.mariadb.namespace | default "webapp" }}
   annotations:
     argocd.argoproj.io/sync-wave: "2"
@@ -27,7 +27,7 @@ spec:
     - "ALL"
   database: webapp-db
   table: "*"
-  username: webapp-user
+  username: webapp_user
   host: "%"
 ---
 apiVersion: v1

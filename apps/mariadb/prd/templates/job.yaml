@@ -1,34 +1,38 @@
-# apiVersion: batch/v1
-# kind: Job
-# metadata:
-#   name: webapp-db-init-job
-#   namespace: webapp
-# spec:
-#   template:
-#     spec:
-#       restartPolicy: OnFailure
-#       containers:
-#       - name: db-init
-#         image: mariadb:11.4
-#         command:
-#         - sh
-#         - -c
-#         - |
-#           until mysqladmin ping -h webapp-mariadb -u webapp-user --silent; do
-#             echo "Waiting for MariaDB..."
-#             sleep 3
-#           done
-#           mysql -h webapp-mariadb -u webapp-user webapp-db < /init/init.sql
-#         env:
-#         - name: MYSQL_PWD
-#           valueFrom:
-#             secretKeyRef:
-#               name: mariadb-webapp-password
-#               key: password
-#         volumeMounts:
-#         - name: init-sql
-#           mountPath: /init
-#       volumes:
-#       - name: init-sql
-#         configMap:
-#           name: webapp-db-init
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: webapp-db-init-cron
+  namespace: webapp
+spec:
+  schedule: "0 0 * * *"   # dummy schedule; won’t run because suspend=true
+  suspend: true           # prevent automatic execution
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: db-init
+            image: mariadb:11.4
+            command:
+            - sh
+            - -c
+            - |
+              until mysqladmin ping -h webapp-mariadb -u webapp-user --silent; do
+                echo "Waiting for MariaDB..."
+                sleep 3
+              done
+              mysql -h webapp-mariadb -u webapp-user webapp-db < /init/init.sql
+            env:
+            - name: MYSQL_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-webapp-password
+                  key: password
+            volumeMounts:
+            - name: init-sql
+              mountPath: /init
+          volumes:
+          - name: init-sql
+            configMap:
+              name: webapp-db-init
