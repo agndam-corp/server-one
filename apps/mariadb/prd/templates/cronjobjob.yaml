@@ -13,16 +13,16 @@ spec:
           restartPolicy: OnFailure
           containers:
           - name: db-init
-            image: mariadb:11.4
+            image: mysql:8.0
             command:
             - sh
             - -c
             - |
-              until mysql -h webapp-mariadb -u webapp-user -p"$MYSQL_PWD" -e "SELECT 1;" &> /dev/null; do
+              until mysql -h webapp-mariadb.webapp.svc.cluster.local -u webapp-user -p"$MYSQL_PWD" -e "SELECT 1;" &> /dev/null; do
                 echo "Waiting for MariaDB..."
                 sleep 3
               done
-              mysql -h webapp-mariadb -u webapp-user webapp-db < /init/init.sql
+              mysql -h webapp-mariadb.webapp.svc.cluster.local -u webapp-user webapp-db < /init/init.sql
             env:
             - name: MYSQL_PWD
               valueFrom:
