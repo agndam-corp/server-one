@@ -24,16 +24,11 @@ spec:
   # Service configuration
   service:
     type: ClusterIP
-    port: 3306
-    accessModes:
-      - ReadWriteOnce
   
   # Storage configuration
   storage:
     size: {{ .Values.mariadb.storage.size | default "10Gi" }}
     storageClassName: ""
-    accessModes:
-      - ReadWriteOnce
   
   # Pod affinity and resources
   podSecurityContext:
