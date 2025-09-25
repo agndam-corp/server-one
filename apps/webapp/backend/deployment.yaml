@@ -39,9 +39,9 @@ spec:
         - name: DB_PORT
           value: "3306"
         - name: DB_USER
-          value: "webapp_user"
+          value: "webapp-user"
         - name: DB_NAME
-          value: "webapp_db"
+          value: "webapp-db"
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
