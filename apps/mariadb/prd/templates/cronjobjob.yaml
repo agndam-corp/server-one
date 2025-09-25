@@ -18,7 +18,7 @@ spec:
             - sh
             - -c
             - |
-              until mysqladmin ping -h webapp-mariadb -u webapp-user --silent; do
+              until mysql -h webapp-mariadb -u webapp-user -p"$MYSQL_PWD" -e "SELECT 1;" &> /dev/null; do
                 echo "Waiting for MariaDB..."
                 sleep 3
               done
