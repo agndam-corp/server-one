@@ -25,6 +25,8 @@ spec:
   service:
     type: ClusterIP
     port: 3306
+    accessModes:
+      - ReadWriteOnce
   
   # Storage configuration
   storage:
