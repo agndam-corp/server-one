@@ -49,6 +49,8 @@ spec:
               key: password
         - name: AWS_REGION
           value: "us-east-1"
+        - name: RESET_DATABASE
+          value: "true"
         volumeMounts:
         - name: client-cert
           mountPath: /etc/ssl/certs/webapp
