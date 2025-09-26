@@ -23,6 +23,7 @@ kubeconfig.yaml
 .env
 
 # Ignore private files
+private
 private/
 .vscode/
 notes/
