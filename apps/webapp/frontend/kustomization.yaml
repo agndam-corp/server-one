@@ -9,4 +9,4 @@ commonLabels:
   app: webapp-frontend
 images:
   - name: ghcr.io/agndam-corp/web-frontend
-    newTag: 4357d6e
+    newTag: 9b517da
