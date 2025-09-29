@@ -87,6 +87,9 @@ echo
 echo "Enter the VPN Instance ID:"
 read VPN_INSTANCE_ID
 echo
+echo "Enter the AWS Region (e.g., us-east-1):"
+read AWS_REGION
+echo
 
 # MariaDB Passwords
 echo "Enter MariaDB root password:"
@@ -229,6 +232,7 @@ fi
 # Webapp Configuration Secrets
 kubectl create secret generic vpn-instance-config \
   --from-literal=instanceId="$VPN_INSTANCE_ID" \
+  --from-literal=awsRegion="$AWS_REGION" \
   --namespace webapp \
   --dry-run=client \
   -o yaml > $TEMP_DIR/vpn-instance-config.yaml

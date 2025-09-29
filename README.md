@@ -2,6 +2,18 @@
 
 This repository contains the configuration and deployment files for a Kubernetes server setup using K3s, ArgoCD, and various applications.
 
+## Overview
+
+This project implements a comprehensive infrastructure for hosting web applications with integrated AWS EC2 instance management. The system provides:
+
+- Secure user authentication and authorization
+- Role-based access control (admin/users)
+- AWS EC2 instance lifecycle management (start/stop/status)
+- Multi-region AWS support
+- Database-backed instance configuration storage
+- RESTful API with Swagger documentation
+- Containerized deployment via Kubernetes
+
 ## Prerequisites
 
 Before deploying, ensure you have the following tools installed:
@@ -89,6 +101,59 @@ The setup includes a complete DNS solution with AdGuard Home providing:
 - Web UI at `dns-adg-ui.djasko.com`
 
 All DNS services are secured with Let's Encrypt certificates managed by cert-manager.
+
+## AWS Instance Management
+
+This project includes a comprehensive AWS EC2 instance management system with the following features:
+
+### Key Features
+- **Multi-region Support**: Manage EC2 instances across multiple AWS regions
+- **Database-backed Configuration**: Instance configurations stored in MariaDB
+- **Role-based Access Control**: Separate permissions for regular users and administrators
+- **RESTful API**: Clean API endpoints for all instance operations
+- **Swagger Documentation**: Interactive API documentation at `/swagger/index.html`
+
+### API Endpoints
+
+#### Instance Operations (User)
+- `GET /instances` - List all instances owned by the current user
+- `GET /instances/:id` - Get details of a specific instance
+- `POST /instances` - Create a new instance configuration
+- `PUT /instances/:id` - Update an existing instance configuration
+- `DELETE /instances/:id` - Delete an instance configuration
+
+#### Instance Actions
+- `POST /start` - Start an EC2 instance (requires instanceId and region)
+- `POST /stop` - Stop an EC2 instance (requires instanceId and region)
+- `GET /status` - Get the status of an EC2 instance (requires instanceId and region as query parameters)
+
+#### Admin Operations
+- `POST /admin/instances` - Admin endpoint to create instances for any user
+- `PUT /admin/instances/:id` - Admin endpoint to update any instance
+- `DELETE /admin/instances/:id` - Admin endpoint to delete any instance
+
+### Database Schema
+
+Instances are stored in the `aws_instances` table with the following fields:
+- `id` - Unique identifier
+- `name` - Human-readable name for the instance
+- `instance_id` - AWS EC2 instance ID
+- `region` - AWS region where the instance is located
+- `description` - Description of the instance
+- `status` - Current status (managed in the application)
+- `created_by` - User ID of the owner
+- `created_at` - Timestamp when the record was created
+- `updated_at` - Timestamp when the record was last updated
+
+### Sample Data Initialization
+
+To initialize sample instances for testing, use the script:
+```bash
+cd project/scripts
+./init-sample-instances.sh
+```
+
+This will create sample VPN server instances in different AWS regions.
 
 ## Security Notes
 
