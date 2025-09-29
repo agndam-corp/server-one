@@ -91,6 +91,15 @@ echo "Enter the AWS Region (e.g., us-east-1):"
 read AWS_REGION
 echo
 
+# VPN Role Setup for IAM Roles Anywhere
+echo "Enter the Trust Anchor ARN:"
+read TRUST_ANCHOR_ARN
+echo "Enter the Roles Anywhere Profile ARN:"
+read ROLES_ANYWHERE_PROFILE_ARN
+echo "Enter the IAM Role ARN:"
+read IAM_ROLE_ARN
+echo
+
 # MariaDB Passwords
 echo "Enter MariaDB root password:"
 read -s MARIADB_ROOT_PASSWORD
@@ -237,6 +246,15 @@ kubectl create secret generic vpn-instance-config \
   --dry-run=client \
   -o yaml > $TEMP_DIR/vpn-instance-config.yaml
 
+# VPN Role Setup for IAM Roles Anywhere
+kubectl create secret generic vpn-role-setup \
+  --from-literal=trust-anchor-arn="$TRUST_ANCHOR_ARN" \
+  --from-literal=profile-arn="$ROLES_ANYWHERE_PROFILE_ARN" \
+  --from-literal=role-arn="$IAM_ROLE_ARN" \
+  --namespace webapp \
+  --dry-run=client \
+  -o yaml > $TEMP_DIR/vpn-role-setup.yaml
+
 # MariaDB Secrets
 kubectl create secret generic mariadb-root-password \
   --from-literal=password="$MARIADB_ROOT_PASSWORD" \
@@ -252,6 +270,9 @@ kubectl create secret generic mariadb-webapp-password \
 
 # Webapp Configuration SealedSecrets
 kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/vpn-instance-config.yaml > /home/ubuntu/webapp/project/sealed-secrets/prd/vpn-instance-config-sealed.yaml
+
+# VPN Role Setup SealedSecret
+kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/vpn-role-setup.yaml > /home/ubuntu/webapp/project/sealed-secrets/prd/vpn-role-setup-sealed.yaml
 
 # MariaDB SealedSecrets
 kubeseal --controller-name sealed-secrets --controller-namespace kube-system < $TEMP_DIR/mariadb-root-password.yaml > /home/ubuntu/webapp/project/sealed-secrets/prd/mariadb-root-password-sealed.yaml
