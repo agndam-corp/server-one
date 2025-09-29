@@ -255,6 +255,8 @@ kubectl create secret generic vpn-role-setup \
   --dry-run=client \
   -o yaml > $TEMP_DIR/vpn-role-setup.yaml
 
+
+
 # MariaDB Secrets
 kubectl create secret generic mariadb-root-password \
   --from-literal=password="$MARIADB_ROOT_PASSWORD" \

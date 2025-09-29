@@ -18,17 +18,49 @@ spec:
     spec:
       imagePullSecrets:
       - name: ghcr-secret
+      initContainers:
+      - name: aws-config-init
+        image: busybox:1.35
+        command:
+        - sh
+        - -c
+        - |
+          mkdir -p /aws-config-volume
+          echo "[profile rolesanywhere-webapp]" > /aws-config-volume/config
+          echo "credential_process = aws_signing_helper credential-process \\" >> /aws-config-volume/config
+          echo "    --certificate /etc/ssl/certs/webapp/tls.crt \\" >> /aws-config-volume/config
+          echo "    --private-key /etc/ssl/certs/webapp/tls.key \\" >> /aws-config-volume/config
+          echo "    --trust-anchor-arn $(TRUST_ANCHOR_ARN) \\" >> /aws-config-volume/config
+          echo "    --profile-arn $(PROFILE_ARN) \\" >> /aws-config-volume/config
+          echo "    --role-arn $(ROLE_ARN) \\" >> /aws-config-volume/config
+          echo "    --region $(AWS_REGION)" >> /aws-config-volume/config
+        env:
+        - name: TRUST_ANCHOR_ARN
+          valueFrom:
+            secretKeyRef:
+              name: vpn-role-setup
+              key: trust-anchor-arn
+        - name: PROFILE_ARN
+          valueFrom:
+            secretKeyRef:
+              name: vpn-role-setup
+              key: profile-arn
+        - name: ROLE_ARN
+          valueFrom:
+            secretKeyRef:
+              name: vpn-role-setup
+              key: role-arn
+        - name: AWS_REGION
+          value: us-east-1
+        volumeMounts:
+        - name: aws-config-volume
+          mountPath: /aws-config-volume
       containers:
       - name: webapp-backend
         image: ghcr.io/agndam-corp/web-backend:latest  # Updated image name
         ports:
         - containerPort: 8080
         env:
-        - name: VPN_INSTANCE_ID
-          valueFrom:
-            secretKeyRef:
-              name: vpn-instance-config
-              key: instanceId
         - name: JWT_SECRET
           valueFrom:
             secretKeyRef:
@@ -48,14 +80,17 @@ spec:
               name: mariadb-webapp-password
               key: password
         - name: AWS_REGION
-          value: "us-east-1"
-        - name: IAM_ROLE_ARN
-          value: "arn:aws:iam::015482588147:role/webapp-vpn-control-role"
+          value: us-east-1
+        - name: AWS_PROFILE
+          value: "rolesanywhere-webapp"
         - name: RESET_DATABASE
           value: "false"
         volumeMounts:
         - name: client-cert
           mountPath: /etc/ssl/certs/webapp
+          readOnly: true
+        - name: aws-config-volume
+          mountPath: /root/.aws
           readOnly: true
         resources:
           limits:
@@ -68,3 +103,5 @@ spec:
       - name: client-cert
         secret:
           secretName: webapp-client-tls
+      - name: aws-config-volume
+        emptyDir: {}
