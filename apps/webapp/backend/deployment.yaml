@@ -26,14 +26,10 @@ spec:
         - -c
         - |
           mkdir -p /aws-config-volume
-          echo "[profile rolesanywhere-profile]" > /aws-config-volume/config
-          echo "credential_process = aws_signing_helper credential-process \\" >> /aws-config-volume/config
-          echo "    --certificate /etc/ssl/certs/webapp/tls.crt \\" >> /aws-config-volume/config
-          echo "    --private-key /etc/ssl/certs/webapp/tls.key \\" >> /aws-config-volume/config
-          echo "    --trust-anchor-arn $(TRUST_ANCHOR_ARN) \\" >> /aws-config-volume/config
-          echo "    --profile-arn $(PROFILE_ARN) \\" >> /aws-config-volume/config
-          echo "    --role-arn $(ROLE_ARN) \\" >> /aws-config-volume/config
-          echo "    --region $(AWS_REGION)" >> /aws-config-volume/config
+          {
+              echo "[profile rolesanywhere-profile]";
+              echo "credential_process = aws_signing_helper credential-process --certificate /etc/ssl/certs/webapp/tls.crt --private-key /etc/ssl/certs/webapp/tls.key --trust-anchor-arn $TRUST_ANCHOR_ARN --profile-arn $PROFILE_ARN --role-arn $ROLE_ARN --region $AWS_REGION";
+          } > /aws-config-volume/config
         env:
         - name: TRUST_ANCHOR_ARN
           valueFrom:
