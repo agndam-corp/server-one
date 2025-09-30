@@ -22,4 +22,5 @@ spec:
     encoding: PKCS1
     size: 2048
   usages:
-    - client auth
+    - digital signature   # Key usage
+    - client auth         # Extended key usage
