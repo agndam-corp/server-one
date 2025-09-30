@@ -14,4 +14,4 @@ commonLabels:
 
 images:
 - name: ghcr.io/agndam-corp/web-backend
-  newTag: 8f6dc9b
+  newTag: d97c4e0
