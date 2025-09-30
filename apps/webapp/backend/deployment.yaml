@@ -82,7 +82,7 @@ spec:
         - name: AWS_REGION
           value: us-east-1
         - name: AWS_PROFILE
-          value: "rolesanywhere-webapp"
+          value: "rolesanywhere-profile"
         - name: RESET_DATABASE
           value: "false"
         volumeMounts:
