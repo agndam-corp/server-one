@@ -26,7 +26,7 @@ spec:
         - -c
         - |
           mkdir -p /aws-config-volume
-          echo "[profile rolesanywhere-webapp]" > /aws-config-volume/config
+          echo "[profile rolesanywhere-profile]" > /aws-config-volume/config
           echo "credential_process = aws_signing_helper credential-process \\" >> /aws-config-volume/config
           echo "    --certificate /etc/ssl/certs/webapp/tls.crt \\" >> /aws-config-volume/config
           echo "    --private-key /etc/ssl/certs/webapp/tls.key \\" >> /aws-config-volume/config
