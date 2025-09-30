@@ -81,24 +81,18 @@ resource "aws_iam_role" "vpn_server_role" {
           Service = "ec2.amazonaws.com"
         }
         Action = "sts:AssumeRole"
-      }
-    ]
-  })
-}
-
-# Create IAM role for the webapp to control the VPN server
-resource "aws_iam_role" "webapp_vpn_control_role" {
-  name = "webapp-vpn-control-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
+      },
       {
+        Sid    = "AllowRolesAnywhereAssume"
         Effect = "Allow"
         Principal = {
           Service = "rolesanywhere.amazonaws.com"
         }
-        Action = "sts:AssumeRole"
+        Action = [
+          "sts:AssumeRole",
+          "sts:SetSourceIdentity",
+          "sts:TagSession"
+        ]
         Condition = {
           StringEquals = {
             "aws:PrincipalTag/x509Subject/CN" = "webapp"
@@ -111,6 +105,40 @@ resource "aws_iam_role" "webapp_vpn_control_role" {
     ]
   })
 }
+
+
+# Create IAM role for the webapp to control the VPN server
+resource "aws_iam_role" "webapp_vpn_control_role" {
+  name = "webapp-vpn-control-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowRolesAnywhereAssume"
+        Effect = "Allow"
+        Principal = {
+          Service = "rolesanywhere.amazonaws.com"
+        }
+        Action = [
+          "sts:AssumeRole",
+          "sts:SetSourceIdentity",
+          "sts:TagSession"
+        ]
+        Condition = {
+          StringEquals = {
+            "aws:PrincipalTag/x509Subject/CN" = "webapp"
+          }
+          ArnEquals = {
+            "aws:SourceArn" = var.trust_anchor_arn
+          }
+        }
+      }
+    ]
+  })
+}
+
+
 
 # Attach necessary policies to the VPN server IAM role
 resource "aws_iam_role_policy_attachment" "vpn_server_policy" {
@@ -126,6 +154,7 @@ resource "aws_iam_policy" "webapp_vpn_control_policy" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
+      # Allow starting/stopping and describing the specific VPN instance
       {
         Effect = "Allow"
         Action = [
@@ -134,8 +163,9 @@ resource "aws_iam_policy" "webapp_vpn_control_policy" {
           "ec2:DescribeInstances",
           "ec2:DescribeInstanceStatus"
         ]
-        Resource = "arn:aws:ec2:${var.region}:${data.aws_caller_identity.current.account_id}:instance/${aws_instance.vpn_server.id}"
+        Resource = "*"
       },
+      # Allow describing any EC2 instance (read-only)
       {
         Effect = "Allow"
         Action = [
@@ -147,6 +177,7 @@ resource "aws_iam_policy" "webapp_vpn_control_policy" {
     ]
   })
 }
+
 
 # Attach policy to webapp role
 resource "aws_iam_role_policy_attachment" "webapp_vpn_control_policy_attachment" {
@@ -241,8 +272,9 @@ data "aws_caller_identity" "current" {}
 
 # Create IAM Roles Anywhere trust anchor
 resource "aws_rolesanywhere_trust_anchor" "vpn_ca" {
-  count = var.create_trust_anchor ? 1 : 0
-  name  = "vpn-ca-trust-anchor"
+  count   = var.create_trust_anchor ? 1 : 0
+  name    = "vpn-ca-trust-anchor"
+  enabled = true
 
   source {
     source_data {
@@ -255,5 +287,6 @@ resource "aws_rolesanywhere_trust_anchor" "vpn_ca" {
 # Create IAM Roles Anywhere profile
 resource "aws_rolesanywhere_profile" "vpn_server" {
   name      = "vpn-server-profile"
-  role_arns = [aws_iam_role.vpn_server_role.arn]
+  role_arns = [aws_iam_role.vpn_server_role.arn, aws_iam_role.webapp_vpn_control_role.arn]
+  enabled   = true
 }
