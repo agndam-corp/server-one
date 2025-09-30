@@ -12,7 +12,6 @@ spec:
   subject:
     organizations:
       - vpn-users
-      - AgndamCorp
   dnsNames:
     - webapp
     - webapp.webapp.svc.cluster.local
